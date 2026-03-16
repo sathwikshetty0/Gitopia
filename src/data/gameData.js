@@ -67,18 +67,18 @@ export const MODULES = [
                 'Git is a distributed version control system.',
                 'It tracks every change to your code over time.',
                 'A repository (repo) is Git\'s database for a project.',
-                'git init → creates a new repo in any folder.',
-                'git log  → shows the list of past commits.',
+                'git init  ────────►  creates a new repo in any folder.',
+                'git log   ────────►  shows the list of past commits.',
             ],
             ascii: `
- Project Folder
-      │
-      ▼
- ┌──────────────┐
- │ Git Repo (.git)│
- └──────────────┘
-      │
-      ● Initial Commit  ← HEAD
+   Project Folder
+        │
+        ▼
+  ┌─────────────────┐
+  │ Git Repo (.git) │
+  └─────────────────┘
+        │
+        ● Initial Commit  ← HEAD
       `
         },
         challenges: [
@@ -125,7 +125,7 @@ export const MODULES = [
     {
         id: 'staging_commits',
         title: 'Staging & Commits',
-        subtitle: 'Add → Commit → Repeat',
+        subtitle: 'Add  ────────►  Commit  ────────►  Repeat',
         icon: '📸',
         rewardXP: 150,
         badgeId: 'staged',
@@ -135,17 +135,18 @@ export const MODULES = [
             title: 'MISSION BRIEFING: Staging & Commits',
             lines: [
                 'The staging area is a checkpoint before committing.',
-                'git add <file>  → moves changes into staging.',
-                'git commit -m "msg"  → saves a permanent snapshot.',
+                'git add <file>   ────────►  moves changes into staging.',
+                'git commit -m "msg"   ────────►  saves a permanent snapshot.',
                 'Each commit gets a unique SHA hash (e.g. a3f4bc2).',
-                'Think of it as: edit → stage → save for history.',
+                'git push  ────────►  uploads your commits to a remote server.',
+                'Think of it as: edit  ────────►  stage  ────────►  save for history.',
             ],
             ascii: `
- Working Dir   Staging Area    Repository
-    ┌───┐          ┌───┐         ┌───┐
-    │ ✏ │ git add  │ 📦│ commit  │ ●─●│
-    │   │ ───────► │   │ ──────► │   │
-    └───┘          └───┘         └───┘
+ Working Dir      Staging Area       Repository
+    ┌────┐           ┌────┐           ┌────┐
+    │ ✏  │  git add  │ 📦  │  commit  │●──●│
+    │    │  ───────► │    │  ───────► │    │
+    └────┘           └────┘           └────┘
       `
         },
         challenges: [
@@ -208,8 +209,10 @@ export const MODULES = [
             lines: [
                 'A branch is a pointer to a specific commit.',
                 'main is the default branch (or master in older repos).',
-                'git branch feature  → creates a new branch.',
-                'git switch feature  → moves HEAD to that branch.',
+                'git branch feature   ────────►  creates a new branch.',
+                'git switch feature   ────────►  moves HEAD to that branch.',
+                'git checkout <branch>  ────────►  older way to switch branches.',
+                'git checkout -b <name>  ────────►  creates AND switches in one go.',
                 'Branches are cheap and fast! Use them liberally.',
             ],
             ascii: `
@@ -294,7 +297,7 @@ export const MODULES = [
             title: 'MISSION BRIEFING: Merging',
             lines: [
                 'Merging combines two branch histories.',
-                'git merge feature → applies feature changes onto current branch.',
+                'git merge feature  ────────►  applies feature changes onto current branch.',
                 'Fast-forward merge: no divergence, pointer just moves.',
                 'Three-way merge: creates a new merge commit.',
                 'Always merge INTO the target branch (e.g. checkout main first).',
@@ -313,8 +316,8 @@ export const MODULES = [
                 question: 'What is the CORRECT sequence of commands?',
                 options: [
                     'git merge feature-ui (while on feature-ui)',
-                    'git checkout main → git merge feature-ui',
-                    'git push feature-ui → git pull main',
+                    'git checkout main  ────────►  git merge feature-ui',
+                    'git push feature-ui  ────────►  git pull main',
                     'git merge main (while on feature-ui)',
                 ],
                 correct: 1,
@@ -385,9 +388,9 @@ export const MODULES = [
             lines: [
                 'A remote is a version of your repo hosted on the internet.',
                 'GitHub, GitLab, and Bitbucket host remotes.',
-                'git remote add origin <url> → links local to remote.',
-                'git push origin main → uploads your commits.',
-                'git pull → fetch + merge remote changes into local.',
+                'git remote add origin <url>  ────────►  links local to remote.',
+                'git push origin main  ────────►  uploads your commits.',
+                'git pull  ────────►  fetch + merge remote changes into local.',
             ],
             ascii: `
  Local Repo          GitHub Remote
@@ -450,7 +453,7 @@ export const MODULES = [
                 'A Pull Request (PR) proposes your branch changes to be merged.',
                 'Team members review your code before it lands in main.',
                 'PRs are a GitHub/GitLab concept, not core Git.',
-                'Workflow: branch → commit → push → open PR → review → merge.',
+                'Workflow: branch  ────────►  commit  ────────►  push  ────────►  open PR  ────────►  review  ────────►  merge.',
                 'Good PRs have a clear title, description, and small diff.',
             ],
             ascii: `
@@ -464,7 +467,7 @@ export const MODULES = [
                 question: 'Arrange the Pull Request workflow in order:',
                 items: ['Open PR on GitHub', 'git push origin feature-x', 'git commit -m "feat: add login"', 'git checkout -b feature-x', 'Team reviews & approves', 'PR merged to main'],
                 correct: ['git checkout -b feature-x', 'git commit -m "feat: add login"', 'git push origin feature-x', 'Open PR on GitHub', 'Team reviews & approves', 'PR merged to main'],
-                hints: ['Create branch → commit → push → PR → review → merge'],
+                hints: ['Create branch  ────────►  commit  ────────►  push  ────────►  PR  ────────►  review  ────────►  merge'],
                 xp: 80,
             },
             {
@@ -516,7 +519,7 @@ export const MODULES = [
                 'A conflict happens when two branches changed the same line.',
                 'Git marks the conflicting section with <<<, ===, >>> markers.',
                 'You manually edit the file to choose what to keep.',
-                'Then: git add <file> → git commit to complete the merge.',
+                'Then: git add <file>  ────────►  git commit to complete the merge.',
                 'Prevention: pull often, keep branches short-lived.',
             ],
             ascii: `
@@ -583,8 +586,8 @@ console.log("Hello from feature")
             lines: [
                 'Rebase moves your branch commits to start from a new base.',
                 'It creates a linear history — no merge commits.',
-                'git rebase main → replays your commits on top of main.',
-                'git rebase -i → interactive rebase (squash, edit, reorder).',
+                'git rebase main  ────────►  replays your commits on top of main.',
+                'git rebase -i  ────────►  interactive rebase (squash, edit, reorder).',
                 'Golden rule: never rebase shared/public branches!',
             ],
             ascii: `
@@ -630,7 +633,7 @@ console.log("Hello from feature")
                     'git commit -m "fix conflict"',
                 ],
                 correct: 2,
-                hints: ['Same pattern as merge: resolve → add → continue'],
+                hints: ['Same pattern as merge: resolve  ────────►  add  ────────►  continue'],
                 xp: 80,
             },
         ],
@@ -716,7 +719,7 @@ console.log("Hello from feature")
                 'Fork: copy someone\'s repo to your GitHub account.',
                 'Clone: download your fork to your local machine.',
                 'Create a feature branch, commit, push to YOUR fork.',
-                'Open a PR from your fork → upstream repo.',
+                'Open a PR from your fork  ────────►  upstream repo.',
                 'Good first issues are labeled "good first issue" on GitHub.',
             ],
             ascii: `
@@ -871,10 +874,50 @@ export const CHEAT_SHEET = [
         ]
     },
     {
-        category: "Repository Maintenance",
+        category: "Modern Alternatives",
         commands: [
-            { cmd: "git gc", desc: "Cleanup unnecessary files and optimize the local repository", examples: ["git gc", "git gc --aggressive"] },
-            { cmd: "git fsck", desc: "Verify the connectivity and validity of objects in the database", examples: ["git fsck", "git fsck --full"] },
+            { cmd: "git restore", desc: "Restore working tree files", examples: ["git restore filename", "git restore --staged filename"] },
+            { cmd: "git switch", desc: "Switch to a different branch", examples: ["git switch main", "git switch -c new-feature"] },
         ]
     },
+    {
+        category: "Submodules & Worktrees",
+        commands: [
+            { cmd: "git submodule", desc: "Initialize, update or inspect submodules", examples: ["git submodule add url", "git submodule update --init"] },
+            { cmd: "git worktree", desc: "Manage multiple working trees", examples: ["git worktree add ../path branch", "git worktree list"] },
+            { cmd: "git sparse-checkout", desc: "Reduce working tree to a subset of directories", examples: ["git sparse-checkout init", "git sparse-checkout set dir/"] },
+        ]
+    },
+    {
+        category: "Collaboration & Patching",
+        commands: [
+            { cmd: "git format-patch", desc: "Prepare patches for e-mail submission", examples: ["git format-patch main", "git format-patch -1 HEAD"] },
+            { cmd: "git am", desc: "Apply a series of patches from a mailbox", examples: ["git am patch-file.patch", "git am --continue"] },
+            { cmd: "git shortlog", desc: "Summarize git log output", examples: ["git shortlog", "git shortlog -sn"] },
+        ]
+    },
+    {
+        category: "Internal Inspection",
+        commands: [
+            { cmd: "git grep", desc: "Print lines matching a pattern", examples: ["git grep \"search-term\"", "git grep -n \"term\""] },
+            { cmd: "git describe", desc: "Give an object a human readable name based on an available ref", examples: ["git describe", "git describe --tags"] },
+            { cmd: "git rev-parse", desc: "Pick out and massage parameters", examples: ["git rev-parse --show-toplevel", "git rev-parse HEAD"] },
+        ]
+    },
+    {
+        category: "Advanced Utility",
+        commands: [
+            { cmd: "git archive", desc: "Create an archive of files from a named tree", examples: ["git archive --format=zip HEAD > project.zip"] },
+            { cmd: "git instaweb", desc: "Instantly browse your working repository in gitweb", examples: ["git instaweb", "git instaweb --stop"] },
+            { cmd: "git notes", desc: "Add or inspect object notes", examples: ["git notes add -m \"Comment\"", "git notes show"] },
+        ]
+    },
+    {
+        category: "Deep Maintenance",
+        commands: [
+            { cmd: "git maintenance", desc: "Run tasks to keep repository optimized", examples: ["git maintenance start", "git maintenance run"] },
+            { cmd: "git prune", desc: "Prune all unreachable objects from the object database", examples: ["git prune", "git prune --dry-run"] },
+            { cmd: "git count-objects", desc: "Count unpacked number of objects and their disk consumption", examples: ["git count-objects -v"] },
+        ]
+    }
 ];

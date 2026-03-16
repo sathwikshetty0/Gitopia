@@ -8,7 +8,7 @@ export default function Dashboard({ player, dispatch }) {
     const { current: levelInfo } = getLevelInfo(player.xp);
 
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '1.5rem', padding: '1.5rem', maxWidth: '1400px', margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '1rem', padding: '0.75rem 1.5rem', maxWidth: '1600px', margin: '0 auto' }}>
             {/* LEFT — Profile */}
             <aside className="flex-col gap-4" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <ProfileCard player={player} levelInfo={levelInfo} dispatch={dispatch} />
@@ -206,8 +206,8 @@ function SkillTree({ player, dispatch }) {
             </div>
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-                gap: '1rem',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: '1.5rem',
             }}>
                 {MODULES.map((mod, i) => (
                     <MissionNode key={mod.id} mod={mod} player={player} dispatch={dispatch} index={i} />
@@ -233,15 +233,18 @@ function MissionNode({ mod, player, dispatch, index }) {
                 background: isCompleted ? 'rgba(88,166,255,0.07)' : isAvailable ? `rgba(57,255,20,0.04)` : 'rgba(0,0,0,0.3)',
                 border: `1.5px solid ${borderColor}`,
                 borderRadius: '10px',
-                padding: '1.1rem',
+                padding: '1.25rem',
                 cursor: isLocked ? 'not-allowed' : 'pointer',
-                boxShadow: isAvailable ? `0 0 10px ${mod.color}30` : 'none',
+                boxShadow: isAvailable ? `0 0 12px ${mod.color}25` : 'none',
                 transition: 'all 0.3s ease',
                 opacity: isLocked ? 0.4 : 1,
                 position: 'relative',
                 overflow: 'hidden',
+                minHeight: '190px',
+                display: 'flex',
+                flexDirection: 'column'
             }}
-            onClick={() => !isLocked && !isCompleted && dispatch({ type: 'START_MISSION', payload: mod.id })}
+            onClick={() => !isLocked && dispatch({ type: 'START_MISSION', payload: mod.id })}
         >
             {isCompleted && (
                 <div style={{
@@ -256,21 +259,21 @@ function MissionNode({ mod, player, dispatch, index }) {
                 }}>🔒</div>
             )}
 
-            <div style={{ fontSize: '1.6rem', marginBottom: '0.5rem' }}>{mod.icon}</div>
-            <div className="pixel" style={{ fontSize: '0.55rem', color: borderColor, marginBottom: '0.25rem' }}>
+            <div style={{ fontSize: '2rem', marginBottom: '0.4rem' }}>{mod.icon}</div>
+            <div className="pixel" style={{ fontSize: '0.75rem', color: borderColor, marginBottom: '0.35rem' }}>
                 {mod.title}
             </div>
-            <div className="dim-text text-xs" style={{ marginBottom: '0.75rem', lineHeight: 1.5 }}>
+            <div className="dim-text" style={{ fontSize: '0.78rem', marginBottom: '1rem', lineHeight: 1.5, flex: 1 }}>
                 {mod.subtitle}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: 'var(--gold)', fontSize: '0.72rem', fontWeight: 700 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
+                <span style={{ color: 'var(--gold)', fontSize: '0.85rem', fontWeight: 800 }}>
                     +{mod.rewardXP} XP
                 </span>
-                {isCompleted && <span className="badge badge-blue" style={{ fontSize: '0.55rem' }}>DONE</span>}
-                {isAvailable && <span className="badge badge-neon" style={{ fontSize: '0.55rem' }}>PLAY</span>}
-                {isLocked && <span className="badge badge-dim" style={{ fontSize: '0.55rem' }}>LOCKED</span>}
+                {isCompleted && <span className="badge badge-blue" style={{ fontSize: '0.6rem', padding: '0.3rem 0.6rem' }}>REPLAY</span>}
+                {isAvailable && <span className="badge badge-neon" style={{ fontSize: '0.6rem', padding: '0.3rem 0.6rem' }}>PLAY</span>}
+                {isLocked && <span className="badge badge-dim" style={{ fontSize: '0.6rem', padding: '0.3rem 0.6rem' }}>LOCKED</span>}
             </div>
         </motion.div>
     );

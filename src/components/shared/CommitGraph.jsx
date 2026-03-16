@@ -28,9 +28,15 @@ function buildRFNodes(graphNodes) {
         position: { x: n.x, y: n.y },
         data: {
             label: (
-                <div style={{ textAlign: 'center', fontFamily: 'Fira Code, monospace', fontSize: '0.65rem' }}>
+                <div style={{ 
+                    textAlign: 'center', 
+                    fontFamily: 'Fira Code, monospace', 
+                    fontSize: '0.68rem',
+                    width: '100%',
+                    padding: '4px',
+                }}>
                     <div style={{
-                        width: 28, height: 28, borderRadius: '50%', margin: '0 auto 4px',
+                        width: 32, height: 32, borderRadius: '50%', margin: '0 auto 6px',
                         background: n.isHead ? '#58a6ff' : getBranchColor(n.branch),
                         boxShadow: n.isHead
                             ? '0 0 12px #58a6ff'
@@ -41,10 +47,22 @@ function buildRFNodes(graphNodes) {
                     }}>
                         {n.label[0]}
                     </div>
-                    <span style={{ color: n.isHead ? '#58a6ff' : '#fff' }}>{n.label}</span>
-                    {n.isHead && <div style={{ color: '#58a6ff', fontSize: '0.55rem', marginTop: '2px' }}>HEAD</div>}
+                    <div style={{ 
+                        color: n.isHead ? '#58a6ff' : '#fff',
+                        whiteSpace: 'normal',
+                        wordBreak: 'break-word',
+                        lineHeight: 1.2
+                    }}>
+                        {n.label}
+                    </div>
+                    {n.isHead && <div style={{ color: '#58a6ff', fontSize: '0.55rem', marginTop: '2px', fontWeight: 700 }}>HEAD</div>}
                     {n.branch && (
-                        <div style={{ color: getBranchColor(n.branch), fontSize: '0.5rem' }}>
+                        <div style={{ 
+                            color: getBranchColor(n.branch), 
+                            fontSize: '0.5rem',
+                            marginTop: '2px',
+                            opacity: 0.8
+                        }}>
                             {n.branch}
                         </div>
                     )}
@@ -52,11 +70,13 @@ function buildRFNodes(graphNodes) {
             ),
         },
         style: {
-            background: 'transparent',
-            border: 'none',
-            width: 60,
+            background: 'rgba(255,255,255,0.03)',
+            borderRadius: '8px',
+            border: '1px solid rgba(255,255,255,0.05)',
+            width: 100,
+            cursor: 'grab' // Indentation and cursor for UX
         },
-        draggable: false,
+        draggable: true,
     }));
 }
 
@@ -68,10 +88,20 @@ function buildRFEdges(graphEdges, graphNodes) {
             id: `e-${i}`,
             source: e.from,
             target: e.to,
-            type: 'smoothstep',
+            type: 'default', // Using bezier for a natural branching look
             animated: true,
-            style: { stroke: color, strokeWidth: 2 },
-            markerEnd: { type: MarkerType.ArrowClosed, color },
+            style: { 
+                stroke: color, 
+                strokeWidth: 3, 
+                opacity: 0.6,
+                filter: `drop-shadow(0 0 2px ${color})` // Subtle glow on edges
+            },
+            markerEnd: { 
+                type: MarkerType.ArrowClosed, 
+                color,
+                width: 15,
+                height: 15,
+            },
         };
     });
 }
@@ -89,11 +119,12 @@ export function CommitGraph({ graphData }) {
     return (
         <div
             style={{
-                height: '280px',
+                height: '320px',
                 borderRadius: '8px',
                 overflow: 'hidden',
-                border: '1px solid rgba(57,255,20,0.2)',
-                background: '#010409',
+                border: '1px solid rgba(57,255,20,0.15)',
+                background: 'rgba(1, 4, 9, 0.8)',
+                backdropFilter: 'blur(8px)',
             }}
         >
             <ReactFlow
@@ -102,11 +133,11 @@ export function CommitGraph({ graphData }) {
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
                 fitView
-                fitViewOptions={{ padding: 0.35 }}
+                fitViewOptions={{ padding: 0.15 }} // Reduced padding to fill more space
                 proOptions={{ hideAttribution: true }}
-                nodesDraggable={false}
+                nodesDraggable={true}
                 zoomOnScroll={false}
-                panOnDrag={false}
+                panOnDrag={true} // Allow panning for better exploration
             >
                 <Background color="#1a2332" gap={20} />
                 <Controls showInteractive={false} style={{ background: '#161b22', border: '1px solid #333' }} />
