@@ -1,4 +1,4 @@
-# ⚡ Gitopia — Learn Git Like a Game
+# ⚡ Gitopia Learn Git Like a Game
 
 > **A fully interactive, gamified Git learning app built with React + Vite.**
 > Master Git from `git init` to open-source contributions — through missions, a live terminal simulator, and a visual commit graph.
