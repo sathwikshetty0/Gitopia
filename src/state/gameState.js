@@ -63,26 +63,28 @@ export function gameReducer(state, action) {
 
         case 'FINISH_MISSION': {
             const { module, bonusXP } = action.payload;
+            const isReplay = state.player.completedMissions.includes(module.id);
+            
+            // Only add XP if it's the first time completing this mission
             const totalXP = state.currentMissionXP + bonusXP;
-            const newXP = state.player.xp + totalXP;
+            const newXP = isReplay ? state.player.xp : state.player.xp + totalXP;
 
-            const newCompleted = state.player.completedMissions.includes(module.id)
+            const newCompleted = isReplay
                 ? state.player.completedMissions
                 : [...state.player.completedMissions, module.id];
 
-            const newBadges = module.badgeId && !state.player.badges.includes(module.badgeId)
+            const isNewBadge = module.badgeId && !state.player.badges.includes(module.badgeId);
+            const newBadges = isNewBadge
                 ? [...state.player.badges, module.badgeId]
                 : state.player.badges;
 
-            const earnedBadge = module.badgeId && !state.player.badges.includes(module.badgeId)
-                ? module.badgeId
-                : null;
+            const earnedBadge = isNewBadge ? module.badgeId : null;
 
             return {
                 ...state,
                 missionPhase: 'reward',
                 earnedBadge,
-                lastXPGain: totalXP,
+                lastXPGain: isReplay ? 0 : totalXP, // Show 0 in reward screen for replay
                 player: {
                     ...state.player,
                     xp: newXP,

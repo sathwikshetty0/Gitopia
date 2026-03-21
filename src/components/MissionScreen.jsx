@@ -4,12 +4,29 @@ import { MODULES, BADGES } from '../data/gameData';
 import { CommitGraph } from './shared/CommitGraph';
 import { Terminal } from './shared/Terminal';
 
-export default function MissionScreen({ activeMissionId, missionPhase, activeChallengeIndex, currentMissionXP, earnedBadge, dispatch }) {
+// Utility for fuzzy matching command text
+const normalizeForMatch = (str) => {
+    if (!str) return '';
+    return str.toLowerCase()
+        .replace(/────────►/g, ' ') // Remove long arrows
+        .replace(/→/g, ' ')           // Remove standard arrows
+        // Remove dashes/separators that aren't command flags (e.g., "cmd1 - cmd2")
+        .replace(/\s+[-–—]+\s+/g, ' ') 
+        // Remove symbols like ( ) that might be in descriptive text but not crucial for the gist
+        .replace(/[()]/g, '')
+        .replace(/\s+/g, ' ')         // Collapse all whitespace to single spaces
+        .trim();
+};
+
+export default function MissionScreen({ 
+    activeMissionId, missionPhase, activeChallengeIndex, 
+    currentMissionXP, lastXPGain, earnedBadge, dispatch 
+}) {
     const mission = MODULES.find(m => m.id === activeMissionId);
     if (!mission) return null;
 
     return (
-        <div style={{ maxWidth: '860px', margin: '0 auto', padding: '1rem 1.5rem 2rem' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '1rem 1rem 2rem' }}>
             {/* Mission Title bar */}
             <div style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -66,7 +83,13 @@ export default function MissionScreen({ activeMissionId, missionPhase, activeCha
                         initial={{ opacity: 0, scale: 0.88 }} animate={{ opacity: 1, scale: 1, transition: { type: 'spring', stiffness: 200, damping: 20 } }}
                         exit={{ opacity: 0 }}
                     >
-                        <RewardPhase mission={mission} totalXP={currentMissionXP} earnedBadge={earnedBadge} dispatch={dispatch} />
+                        <RewardPhase 
+                            mission={mission} 
+                            totalXP={currentMissionXP} 
+                            actualGainedXP={lastXPGain} 
+                            earnedBadge={earnedBadge} 
+                            dispatch={dispatch} 
+                        />
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -103,19 +126,7 @@ function BriefingPhase({ mission, dispatch }) {
                     {mission.briefing.lines.map((line, i) => (
                         <AnimatePresence key={i}>
                             {i < visibleLines && (
-                                <motion.div
-                                    initial={{ opacity: 0, x: -8 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    style={{
-                                        display: 'flex', gap: '0.6rem', padding: '0.4rem 0',
-                                        borderBottom: '1px solid rgba(255,255,255,0.04)',
-                                        fontFamily: 'var(--font-code)', fontSize: '0.84rem',
-                                        color: 'var(--text)', lineHeight: 1.55,
-                                    }}
-                                >
-                                    <span style={{ color: 'var(--neon)', flexShrink: 0, marginTop: '2px' }}>▸</span>
-                                    <span>{line}</span>
-                                </motion.div>
+                                <BriefingLine text={line.replaceAll('→', ' ────────► ')} />
                             )}
                         </AnimatePresence>
                     ))}
@@ -129,13 +140,28 @@ function BriefingPhase({ mission, dispatch }) {
                         <div className="dot dot-green" />
                         <span style={{ marginLeft: '0.5rem' }}>diagram.sh</span>
                     </div>
-                    <pre style={{
-                        padding: '1rem', fontFamily: 'var(--font-code)', fontSize: '0.78rem',
-                        color: 'var(--neon)', whiteSpace: 'pre', overflowX: 'auto', lineHeight: 1.7,
-                        margin: 0,
+                    <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center',
+                        background: 'rgba(0,0,0,0.6)',
+                        minHeight: '220px',
+                        overflowX: 'auto',
+                        padding: '1rem',
                     }}>
-                        {mission.briefing.ascii}
-                    </pre>
+                        <pre style={{
+                            fontFamily: '"Fira Code", "Courier New", monospace', 
+                            fontSize: '0.9rem',
+                            color: 'var(--neon)', 
+                            whiteSpace: 'pre', 
+                            lineHeight: '1.2',
+                            margin: 0,
+                            textAlign: 'left',
+                            letterSpacing: '0',
+                        }}>
+                            {mission.briefing.ascii}
+                        </pre>
+                    </div>
                 </div>
 
                 {/* Commit graph */}
@@ -151,10 +177,20 @@ function BriefingPhase({ mission, dispatch }) {
                                     <button
                                         key={i}
                                         className="btn"
-                                        style={{ padding: '0.2rem 0.6rem', fontSize: '0.65rem', opacity: i === graphStep ? 1 : 0.4 }}
+                                        style={{ 
+                                            padding: '0.4rem 1.1rem', 
+                                            fontSize: '0.92rem', 
+                                            opacity: i === graphStep ? 1 : 0.4,
+                                            fontWeight: 700,
+                                            letterSpacing: '0.05em',
+                                            borderColor: i === graphStep ? 'var(--neon)' : 'rgba(57,255,20,0.2)',
+                                            boxShadow: i === graphStep ? '0 0 10px rgba(57,255,20,0.3)' : 'none',
+                                            transform: i === graphStep ? 'scale(1.05)' : 'scale(1)',
+                                            transition: 'all 0.2s ease'
+                                        }}
                                         onClick={() => setGraphStep(i)}
                                     >
-                                        Step {i + 1}
+                                        STEP {i + 1}
                                     </button>
                                 ))}
                             </div>
@@ -305,19 +341,38 @@ function MCQChallenge({ challenge, onComplete }) {
     const [hintsShown, setHintsShown] = useState(0);
     const [wrongCount, setWrongCount] = useState(0);
 
-    const handleSubmit = () => {
-        if (selected === null || result) return;
-        const isCorrect = selected === challenge.correct;
+    const isCommand = challenge.options[challenge.correct].trim().toLowerCase().startsWith('git');
+
+    const handleSubmit = (clickedIndex = null) => {
+        const val = clickedIndex !== null ? clickedIndex : selected;
+        if (val === null || result) return;
+
+        const correctOptionText = challenge.options[challenge.correct];
+        const correctOptionLetter = String.fromCharCode(65 + challenge.correct);
+
+        let isCorrect = false;
+        if (isCommand) {
+            // Fuzzy match for commands: ignore arrows/separators but keep command syntax
+            isCorrect = normalizeForMatch(val) === normalizeForMatch(correctOptionText);
+        } else {
+            // Clicking or typing for theory
+            if (typeof val === 'number') {
+                isCorrect = val === challenge.correct;
+            } else {
+                isCorrect = (val.trim().toLowerCase() === correctOptionLetter.trim().toLowerCase()) ||
+                            (normalizeForMatch(val) === normalizeForMatch(correctOptionText));
+            }
+        }
+        
         setResult(isCorrect ? 'correct' : 'wrong');
 
         if (isCorrect) {
-            // Penalty: each wrong attempt costs 5 XP, plus hints
             onComplete(challenge.xp, wrongCount * 5 + hintsShown * 10);
         } else {
             setWrongCount(c => c + 1);
             setTimeout(() => {
                 setResult(null);
-                setSelected(null);
+                setSelected(isCommand ? '' : null);
             }, 1600);
         }
     };
@@ -325,54 +380,101 @@ function MCQChallenge({ challenge, onComplete }) {
     return (
         <div className="glass p-6">
             <div className="pixel" style={{ color: 'var(--blue)', fontSize: '0.52rem', marginBottom: '1rem' }}>
-                {challenge.type === 'scenario' ? '📡 SCENARIO CHALLENGE' : '❓ MULTIPLE CHOICE'}
+                {isCommand ? '💻 COMMAND CHALLENGE' : '📜 THEORY CHALLENGE'}
             </div>
-
+            
             {challenge.situation && (
                 <div style={{
-                    background: 'rgba(88,166,255,0.07)', border: '1px solid rgba(88,166,255,0.25)',
-                    borderRadius: '6px', padding: '0.75rem 1rem', marginBottom: '1rem',
-                    fontSize: '0.8rem', lineHeight: 1.6, color: 'var(--text-dim)',
+                    background: 'rgba(88,166,255,0.08)', border: '1px solid rgba(88,166,255,0.2)',
+                    padding: '1rem', borderRadius: '8px', marginBottom: '1.25rem',
+                    fontSize: '0.85rem', lineHeight: 1.6, color: 'var(--text)',
+                    userSelect: 'none'
                 }}>
                     📡 <strong style={{ color: 'var(--blue)' }}>SITUATION:</strong> {challenge.situation}
                 </div>
             )}
 
-            <p style={{ marginBottom: '1.25rem', fontSize: '0.88rem', lineHeight: 1.65, color: 'var(--text)' }}>
+            <p style={{ marginBottom: '1.25rem', fontSize: '0.88rem', lineHeight: 1.65, color: 'var(--text)', userSelect: 'none' }}>
                 {challenge.question}
             </p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.5rem', userSelect: isCommand ? 'none' : 'auto' }}>
+                <div className="dim-text text-xs" style={{ marginBottom: '0.2rem', opacity: 0.6, letterSpacing: '0.05em' }}>
+                    {isCommand ? 'AVAILABLE OPTIONS (CANNOT BE COPIED)' : 'CHOOSE THE CORRECT OPTION:'}
+                </div>
                 {challenge.options.map((opt, i) => {
-                    let bg = 'var(--bg-3)', border = '#3d444d', color = 'var(--text)';
+                    // Logic for display colors
+                    let bg = 'rgba(255,255,255,0.03)', border = '#3d444d', color = 'var(--text)';
+                    
                     if (result === 'correct' && i === challenge.correct) { bg = 'rgba(57,255,20,0.12)'; border = 'var(--neon)'; color = 'var(--neon)'; }
                     if (result === 'wrong' && i === challenge.correct) { bg = 'rgba(57,255,20,0.08)'; border = 'var(--neon)'; color = 'var(--neon)'; }
-                    if (result === 'wrong' && i === selected && i !== challenge.correct) { bg = 'rgba(255,77,77,0.12)'; border = 'var(--red)'; color = 'var(--red)'; }
-                    if (!result && i === selected) { bg = 'rgba(88,166,255,0.10)'; border = 'var(--blue)'; color = 'var(--blue)'; }
+                    if (result === 'wrong' && !isCommand && i === selected && i !== challenge.correct) { bg = 'rgba(255,77,77,0.12)'; border = 'var(--red)'; color = 'var(--red)'; }
+                    if (!result && !isCommand && i === selected) { bg = 'rgba(88,166,255,0.10)'; border = 'var(--blue)'; color = 'var(--blue)'; }
 
                     return (
                         <motion.button
                             key={i}
-                            whileHover={!result ? { x: 4 } : {}}
-                            onClick={() => !result && setSelected(i)}
+                            disabled={!!result || isCommand}
+                            whileHover={(!result && !isCommand) ? { x: 4 } : {}}
+                            onClick={() => {
+                                if (!isCommand && !result) {
+                                    setSelected(i);
+                                }
+                            }}
                             style={{
                                 textAlign: 'left', padding: '0.8rem 1rem', borderRadius: '6px',
                                 background: bg, border: `1.5px solid ${border}`, color,
                                 fontFamily: 'var(--font-code)', fontSize: '0.82rem',
-                                cursor: result ? 'default' : 'pointer',
-                                transition: 'background 0.2s, border-color 0.2s, color 0.2s',
+                                cursor: (isCommand || result) ? 'default' : 'pointer',
+                                transition: 'all 0.2s ease',
+                                userSelect: isCommand ? 'none' : 'auto'
                             }}
                         >
-                            <span style={{ marginRight: '0.6rem', opacity: 0.6 }}>{String.fromCharCode(65 + i)}.</span>
-                            {opt}
+                            <span style={{ marginRight: '0.6rem', opacity: 0.6, color: 'var(--blue)' }}>{String.fromCharCode(65 + i)}.</span>
+                            {opt.replaceAll('→', ' ────────► ')}
                         </motion.button>
                     );
                 })}
             </div>
 
+            {isCommand && (
+                <div className="terminal-window" style={{ marginBottom: '1.5rem', border: result === 'wrong' ? '1px solid var(--red)' : '1px solid var(--blue)' }}>
+                    <div className="terminal-titlebar">
+                        <div className="dot dot-red" /><div className="dot dot-yellow" /><div className="dot dot-green" />
+                        <span style={{ marginLeft: '0.5rem', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                            Command Entry Terminal
+                        </span>
+                    </div>
+                    <div style={{ padding: '0.8rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <span style={{ color: 'var(--blue)', fontWeight: 'bold' }}>EXEC:</span>
+                        <input
+                            type="text"
+                            placeholder="Full git command required..."
+                            value={selected !== null ? selected : ''}
+                            onChange={e => !result && setSelected(e.target.value)}
+                            onKeyDown={e => !result && e.key === 'Enter' && handleSubmit()}
+                            onPaste={e => {
+                                e.preventDefault();
+                                alert("⚠️ SECURITY TRIGGERED: No cheating! You must type the answer manually to learn.");
+                            }}
+                            onContextMenu={e => e.preventDefault()}
+                            style={{
+                                background: 'transparent', border: 'none', outline: 'none', flex: 1,
+                                color: result === 'correct' ? 'var(--neon)' : result === 'wrong' ? 'var(--red)' : '#fff',
+                                fontFamily: 'var(--font-code)', fontSize: '0.9rem',
+                            }}
+                            autoComplete="off"
+                            autoCorrect="off"
+                            spellCheck="false"
+                            disabled={!!result}
+                        />
+                    </div>
+                </div>
+            )}
+
             {wrongCount > 0 && (
-                <div className="dim-text text-xs" style={{ marginBottom: '0.5rem', color: 'var(--red)' }}>
-                    ✗ {wrongCount} wrong attempt{wrongCount > 1 ? 's' : ''} — each costs 5 XP
+                <div className="dim-text text-xs" style={{ marginBottom: '0.5rem', color: 'var(--red)', textAlign: 'center' }}>
+                    ✗ {wrongCount} wrong attempt{wrongCount > 1 ? 's' : ''} — focus cadet!
                 </div>
             )}
 
@@ -380,11 +482,20 @@ function MCQChallenge({ challenge, onComplete }) {
 
             <button
                 className="btn btn-primary w-full"
-                style={{ marginTop: '1rem', opacity: selected === null || result ? 0.5 : 1 }}
-                disabled={selected === null || !!result}
-                onClick={handleSubmit}
+                style={{ 
+                    marginTop: '1rem', 
+                    height: '50px',
+                    fontSize: '1rem',
+                    background: result === 'correct' ? 'var(--neon)' : result === 'wrong' ? 'var(--red)' : 'var(--blue)',
+                    borderColor: 'transparent',
+                    color: '#000',
+                    fontWeight: 800,
+                    opacity: (selected === null && isCommand) || result ? 0.6 : 1
+                }}
+                disabled={(selected === null && !isCommand) || (selected === '' && isCommand) || !!result}
+                onClick={() => handleSubmit()}
             >
-                {result === 'wrong' ? '✗ WRONG — TRY AGAIN' : 'SUBMIT ANSWER'}
+                {result === 'correct' ? 'MISSION ACCOMPLISHED' : result === 'wrong' ? '✗ WRONG — TRY AGAIN' : (isCommand ? 'EXECUTE COMMAND' : 'SUBMIT ANSWER')}
             </button>
         </div>
     );
@@ -439,10 +550,10 @@ function OrderChallenge({ challenge, onComplete }) {
                             whileHover={{ scale: 1.04 }}
                             whileTap={{ scale: 0.97 }}
                             className="btn"
-                            style={{ padding: '0.3rem 0.65rem', fontSize: '0.72rem' }}
+                            style={{ padding: '0.3rem 0.65rem', fontSize: '0.72rem', userSelect: 'none' }}
                             onClick={() => addToSeq(item)}
                         >
-                            {item}
+                            {item.replaceAll('→', ' ────────► ')}
                         </motion.button>
                     ))}
                     {pool.length === 0 && (
@@ -479,7 +590,7 @@ function OrderChallenge({ challenge, onComplete }) {
                     >
                         <span>
                             <span style={{ color: 'var(--neon)', marginRight: '0.5rem' }}>{i + 1}.</span>
-                            {item}
+                            {item.replaceAll('→', ' ────────► ')}
                         </span>
                         <button
                             onClick={() => removeFromSeq(item)}
@@ -518,9 +629,10 @@ function FixCommandChallenge({ challenge, onComplete }) {
 
     const handleCheck = () => {
         if (feedback === 'correct') return;
-        const correct = answer.trim() === challenge.correct.trim();
-        setFeedback(correct ? 'correct' : 'wrong');
-        if (correct) {
+        // Use fuzzy matching for "Fix the Command" too
+        const isCorrect = normalizeForMatch(answer) === normalizeForMatch(challenge.correct);
+        setFeedback(isCorrect ? 'correct' : 'wrong');
+        if (isCorrect) {
             onComplete(challenge.xp, wrongCount * 5 + hintsShown * 10);
         } else {
             setWrongCount(c => c + 1);
@@ -549,11 +661,19 @@ function FixCommandChallenge({ challenge, onComplete }) {
                         value={answer}
                         onChange={e => setAnswer(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && handleCheck()}
+                        onPaste={e => {
+                            e.preventDefault();
+                            alert("⚠️ SECURITY TRIGGERED: No cheating! You must type the fix manually.");
+                        }}
+                        onContextMenu={e => e.preventDefault()}
                         style={{
                             background: 'transparent', border: 'none', outline: 'none', flex: 1,
                             color: feedback === 'correct' ? 'var(--neon)' : feedback === 'wrong' ? 'var(--red)' : 'var(--text)',
                             fontFamily: 'var(--font-code)', fontSize: '0.9rem',
                         }}
+                        autoComplete="off"
+                        autoCorrect="off"
+                        spellCheck="false"
                     />
                 </div>
             </div>
@@ -621,6 +741,11 @@ function ConflictChallenge({ challenge, onComplete }) {
                 <textarea
                     value={resolved}
                     onChange={e => setResolved(e.target.value)}
+                    onPaste={e => {
+                        e.preventDefault();
+                        alert("⚠️ SECURITY TRIGGERED: No cheating! You must resolve the conflict manually.");
+                    }}
+                    onContextMenu={e => e.preventDefault()}
                     rows={7}
                     style={{
                         width: '100%', background: 'transparent', border: 'none', outline: 'none',
@@ -663,6 +788,54 @@ function ConflictChallenge({ challenge, onComplete }) {
     );
 }
 
+function BriefingLine({ text }) {
+    const [hover, setHover] = useState(false);
+    return (
+        <motion.div
+            onMouseEnter={() => setHover(true)}
+            onMouseLeave={() => setHover(false)}
+            style={{
+                display: 'flex', gap: '0.6rem', padding: '0.4rem 0.6rem',
+                borderBottom: '1px solid rgba(255,255,255,0.04)',
+                fontFamily: 'var(--font-code)', fontSize: '0.84rem',
+                color: 'var(--text)', lineHeight: 1.55,
+                cursor: 'pointer',
+                position: 'relative',
+                borderRadius: '4px',
+                marginLeft: '-0.6rem',
+                width: 'calc(100% + 1.2rem)'
+            }}
+            onClick={() => {
+                navigator.clipboard.writeText(text);
+            }}
+        >
+            <span style={{ color: 'var(--neon)', opacity: 0.8 }}>▸</span>
+            <span>{text}</span>
+            {hover && (
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 0.8, scale: 1 }}
+                    style={{
+                        position: 'absolute',
+                        right: '0.75rem',
+                        fontSize: '0.8rem',
+                        display: 'flex',
+                        gap: '0.4rem',
+                        alignItems: 'center',
+                        background: 'var(--bg-3)',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        border: '1px solid var(--border-blue)',
+                        zIndex: 5
+                    }}
+                >
+                    <span style={{ fontSize: '0.65rem', color: 'var(--blue)' }}>🔗 COPY</span>
+                </motion.div>
+            )}
+        </motion.div>
+    );
+}
+
 // ── Shared Hint Row ───────────────────────────────
 function HintRow({ hints, hintsShown, setHintsShown }) {
     if (!hints || hints.length === 0) return null;
@@ -701,7 +874,7 @@ function HintRow({ hints, hintsShown, setHintsShown }) {
 // ═══════════════════════════════════════════════════
 // PHASE 3: REWARD
 // ═══════════════════════════════════════════════════
-function RewardPhase({ mission, totalXP, earnedBadge, dispatch }) {
+function RewardPhase({ mission, totalXP, actualGainedXP, earnedBadge, dispatch }) {
     const badge = BADGES.find(b => b.id === earnedBadge);
     const [animatedXP, setAnimatedXP] = useState(0);
     const isPerfect = totalXP >= mission.rewardXP;
@@ -753,14 +926,19 @@ function RewardPhase({ mission, totalXP, earnedBadge, dispatch }) {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1, transition: { delay: 0.4 } }}
                 >
-                    +{animatedXP} XP
+                    +{animatedXP === 0 && actualGainedXP === 0 ? 0 : animatedXP} XP
                 </motion.div>
 
                 <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)', marginBottom: '1.5rem' }}>
-                    {isPerfect
-                        ? <span style={{ color: 'var(--neon)' }}>⚡ PERFECT RUN — Full XP awarded!</span>
-                        : `${totalXP} / ${mission.rewardXP} XP earned`
-                    }
+                    {actualGainedXP === 0 && (
+                        <span style={{ color: 'var(--blue)' }}>🛰️ REPLAY: You already earned rewards for this mission!</span>
+                    )}
+                    {actualGainedXP > 0 && isPerfect && (
+                        <span style={{ color: 'var(--neon)' }}>⚡ PERFECT RUN — Full XP awarded!</span>
+                    )}
+                    {actualGainedXP > 0 && !isPerfect && (
+                        `${totalXP} / ${mission.rewardXP} XP earned`
+                    )}
                 </div>
 
                 {badge && (

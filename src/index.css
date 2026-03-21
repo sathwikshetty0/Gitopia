@@ -29,6 +29,7 @@
   --glow-neon: 0 0 8px rgba(57, 255, 20, 0.6), 0 0 24px rgba(57, 255, 20, 0.2);
   --glow-blue: 0 0 8px rgba(88, 166, 255, 0.5), 0 0 24px rgba(88, 166, 255, 0.15);
   --glow-gold: 0 0 8px rgba(240, 192, 64, 0.6), 0 0 20px rgba(240, 192, 64, 0.2);
+  --gh-hover: rgba(88, 166, 255, 0.08);
 }
 
 /* --- Reset & Base --- */
@@ -41,6 +42,7 @@
 }
 
 html {
+  font-size: 115%; /* Increased by an additional 10% total */
   scroll-behavior: smooth;
 }
 

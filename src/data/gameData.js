@@ -67,18 +67,20 @@ export const MODULES = [
                 'Git is a distributed version control system.',
                 'It tracks every change to your code over time.',
                 'A repository (repo) is Git\'s database for a project.',
-                'git init → creates a new repo in any folder.',
-                'git log  → shows the list of past commits.',
+                'git init   ──►  creates a new repo in any folder.',
+                'git clone  ──►  copies an existing repo from a URL.',
+                'git log    ──►  shows the list of past commits.',
+                'git status ──►  shows the current state of your repository.',
             ],
             ascii: `
- Project Folder
-      │
-      ▼
- ┌──────────────┐
- │ Git Repo (.git)│
- └──────────────┘
-      │
-      ● Initial Commit  ← HEAD
+   Project Folder
+        │
+        ▼
+  ┌─────────────────┐
+  │ Git Repo (.git) │
+  └─────────────────┘
+        │
+        ● Initial Commit  ← HEAD
       `
         },
         challenges: [
@@ -115,9 +117,18 @@ export const MODULES = [
                 hints: ['Like a ship\'s log — it records what happened'],
                 xp: 40,
             },
+            {
+                id: 'c4',
+                type: 'multiple_choice',
+                question: 'Which command is used to copy an existing repository to your computer?',
+                options: ['git init', 'git copy', 'git clone', 'git download'],
+                correct: 2,
+                hints: ['Think of making a precise "clone" of the remote project'],
+                xp: 40,
+            },
         ],
         graphSteps: [
-            { nodes: [{ id: 'a', label: 'Init', x: 100, y: 80, branch: 'main', isHead: true }], edges: [] },
+            { nodes: [{ id: 'a', label: 'Init', x: 100, y: 100, branch: 'main', isHead: true }], edges: [] },
         ],
     },
 
@@ -125,7 +136,7 @@ export const MODULES = [
     {
         id: 'staging_commits',
         title: 'Staging & Commits',
-        subtitle: 'Add → Commit → Repeat',
+        subtitle: 'Add  ────────►  Commit  ────────►  Repeat',
         icon: '📸',
         rewardXP: 150,
         badgeId: 'staged',
@@ -135,17 +146,20 @@ export const MODULES = [
             title: 'MISSION BRIEFING: Staging & Commits',
             lines: [
                 'The staging area is a checkpoint before committing.',
-                'git add <file>  → moves changes into staging.',
-                'git commit -m "msg"  → saves a permanent snapshot.',
+                'git add .             →  stages ALL changed files at once.',
+                '  ↳ The dot (.) represents your current directory.',
+                'git commit -m "msg"   →  saves a permanent snapshot.',
                 'Each commit gets a unique SHA hash (e.g. a3f4bc2).',
-                'Think of it as: edit → stage → save for history.',
+                'git push origin main  →  uploads your code to the cloud.',
+                '  ↳ push: upload | origin: remote server | main: branch name',
+                'Think of it as: edit  →  stage  →  save for history.',
             ],
             ascii: `
- Working Dir   Staging Area    Repository
-    ┌───┐          ┌───┐         ┌───┐
-    │ ✏ │ git add  │ 📦│ commit  │ ●─●│
-    │   │ ───────► │   │ ──────► │   │
-    └───┘          └───┘         └───┘
+ Working Dir      Staging Area       Repository       Remote Repo
+    ┌────┐           ┌────┐           ┌────┐           ┌────┐
+    │ ✏  │  git add  │ 📦  │  commit  │●──●│  git push │ ☁️  │
+    │    │  ───────► │    │  ───────► │    │  ───────► │    │
+    └────┘           └────┘           └────┘           └────┘
       `
         },
         challenges: [
@@ -181,13 +195,13 @@ export const MODULES = [
         graphSteps: [
             {
                 nodes: [
-                    { id: 'a', label: 'C1', x: 80, y: 80, branch: 'main', isHead: true },
+                    { id: 'a', label: 'C1', x: 80, y: 100, branch: 'main', isHead: true },
                 ], edges: []
             },
             {
                 nodes: [
-                    { id: 'a', label: 'C1', x: 80, y: 80, branch: 'main' },
-                    { id: 'b', label: 'C2', x: 200, y: 80, branch: 'main', isHead: true },
+                    { id: 'a', label: 'C1', x: 80, y: 100, branch: 'main' },
+                    { id: 'b', label: 'C2', x: 230, y: 100, branch: 'main', isHead: true },
                 ], edges: [{ from: 'a', to: 'b' }]
             },
         ],
@@ -208,34 +222,36 @@ export const MODULES = [
             lines: [
                 'A branch is a pointer to a specific commit.',
                 'main is the default branch (or master in older repos).',
-                'git branch feature  → creates a new branch.',
-                'git switch feature  → moves HEAD to that branch.',
+                'git branch loginpage   ────────►  creates a new branch.',
+                'git switch loginpage   ────────►  moves HEAD to that branch.',
+                'git checkout <branch>  ────────►  older way to switch branches.',
+                'git checkout -b <name>  ────────►  creates AND switches in one go.',
                 'Branches are cheap and fast! Use them liberally.',
             ],
             ascii: `
  main  ──●──●──●
               \\
- feature       ●──●
+ loginpage       ●──●
       `
         },
         challenges: [
             {
                 id: 'c1',
                 type: 'terminal',
-                instruction: 'Create a new branch called "feature-login".',
+                instruction: 'Create a new branch called "loginpage".',
                 prompt: 'project/ (main)',
-                expected: ['git branch feature-login', 'git checkout -b feature-login', 'git switch -c feature-login'],
-                successMsg: 'Branch "feature-login" created!',
+                expected: ['git branch loginpage', 'git checkout -b loginpage', 'git switch -c loginpage'],
+                successMsg: 'Branch "loginpage" created!',
                 hints: ['git branch <name>', 'or use git checkout -b <name>'],
                 xp: 40,
             },
             {
                 id: 'c2',
                 type: 'terminal',
-                instruction: 'Switch to the "feature-login" branch.',
+                instruction: 'Switch to the "loginpage" branch.',
                 prompt: 'project/ (main)',
-                expected: ['git switch feature-login', 'git checkout feature-login'],
-                successMsg: 'You are now on branch feature-login!',
+                expected: ['git switch loginpage', 'git checkout loginpage'],
+                successMsg: 'You are now on branch loginpage!',
                 hints: ['git switch <branchname>', 'or git checkout <branchname>'],
                 xp: 40,
             },
@@ -257,7 +273,7 @@ export const MODULES = [
                 id: 'c4',
                 type: 'multiple_choice',
                 question: 'How do you delete a branch that has been merged?',
-                options: ['git branch --remove', 'git branch -d feature', 'git delete feature', 'git rm -branch feature'],
+                options: ['git branch --remove', 'git branch -d loginpage', 'git delete loginpage', 'git rm -branch loginpage'],
                 correct: 1,
                 hints: ['The flag is a lowercase -d'],
                 xp: 70,
@@ -266,16 +282,18 @@ export const MODULES = [
         graphSteps: [
             {
                 nodes: [
-                    { id: 'a', label: 'C1', x: 80, y: 80, branch: 'main' },
-                    { id: 'b', label: 'C2', x: 200, y: 80, branch: 'main', isHead: true },
-                ], edges: [{ from: 'a', to: 'b' }]
+                    { id: 'a', label: 'C1', x: 80, y: 90, branch: 'main' },
+                    { id: 'b', label: 'C2', x: 230, y: 90, branch: 'main' },
+                    { id: 'c', label: 'L1', x: 380, y: 200, branch: 'loginpage', isHead: true },
+                ], edges: [{ from: 'a', to: 'b' }, { from: 'b', to: 'c' }]
             },
             {
                 nodes: [
-                    { id: 'a', label: 'C1', x: 80, y: 80, branch: 'main' },
-                    { id: 'b', label: 'C2', x: 200, y: 80, branch: 'main' },
-                    { id: 'c', label: 'F1', x: 320, y: 160, branch: 'feature', isHead: true },
-                ], edges: [{ from: 'a', to: 'b' }, { from: 'b', to: 'c' }]
+                    { id: 'a', label: 'C1', x: 80, y: 90, branch: 'main' },
+                    { id: 'b', label: 'C2', x: 230, y: 90, branch: 'main' },
+                    { id: 'c', label: 'L1', x: 380, y: 200, branch: 'loginpage' },
+                    { id: 'd', label: 'L2', x: 530, y: 200, branch: 'loginpage', isHead: true },
+                ], edges: [{ from: 'a', to: 'b' }, { from: 'b', to: 'c' }, { from: 'c', to: 'd' }]
             },
         ],
     },
@@ -294,7 +312,7 @@ export const MODULES = [
             title: 'MISSION BRIEFING: Merging',
             lines: [
                 'Merging combines two branch histories.',
-                'git merge feature → applies feature changes onto current branch.',
+                'git merge loginpage  ────────►  applies loginpage changes onto current branch.',
                 'Fast-forward merge: no divergence, pointer just moves.',
                 'Three-way merge: creates a new merge commit.',
                 'Always merge INTO the target branch (e.g. checkout main first).',
@@ -302,23 +320,23 @@ export const MODULES = [
             ascii: `
  main  ──●──●──────●  ← merge commit
               \\  /
- feature       ●──●
+ loginpage       ●──●
       `
         },
         challenges: [
             {
                 id: 'c1',
                 type: 'scenario',
-                situation: 'You have finished work on "feature-ui" branch. You want to bring those changes into main.',
+                situation: 'You have finished work on "loginpage" branch. You want to bring those changes into main.',
                 question: 'What is the CORRECT sequence of commands?',
                 options: [
-                    'git merge feature-ui (while on feature-ui)',
-                    'git checkout main → git merge feature-ui',
-                    'git push feature-ui → git pull main',
-                    'git merge main (while on feature-ui)',
+                    'git merge loginpage (while on loginpage)',
+                    'git checkout main  ────────►  git merge loginpage',
+                    'git push loginpage  ────────►  git pull main',
+                    'git merge main (while on loginpage)',
                 ],
                 correct: 1,
-                hints: ['You must be ON the target branch', 'checkout main, then merge the feature INTO it'],
+                hints: ['You must be ON the target branch', 'checkout main, then merge the loginpage INTO it'],
                 xp: 80,
             },
             {
@@ -338,10 +356,10 @@ export const MODULES = [
             {
                 id: 'c3',
                 type: 'terminal',
-                instruction: 'You are on main. Merge the branch called "feature-ui".',
+                instruction: 'You are on main. Merge the branch called "loginpage".',
                 prompt: 'project/ (main)',
-                expected: ['git merge feature-ui', 'git merge feature-ui --no-ff'],
-                successMsg: 'Merge successful! feature-ui changes are now in main.',
+                expected: ['git merge loginpage', 'git merge loginpage --no-ff'],
+                successMsg: 'Merge successful! loginpage changes are now in main.',
                 hints: ['git merge <branchname>'],
                 xp: 90,
             },
@@ -349,19 +367,19 @@ export const MODULES = [
         graphSteps: [
             {
                 nodes: [
-                    { id: 'a', label: 'C1', x: 80, y: 80, branch: 'main' },
-                    { id: 'b', label: 'C2', x: 200, y: 80, branch: 'main' },
-                    { id: 'c', label: 'F1', x: 280, y: 180, branch: 'feature' },
-                    { id: 'd', label: 'F2', x: 380, y: 180, branch: 'feature', isHead: true },
+                    { id: 'a', label: 'C1', x: 80, y: 90, branch: 'main' },
+                    { id: 'b', label: 'C2', x: 230, y: 90, branch: 'main' },
+                    { id: 'c', label: 'L1', x: 380, y: 200, branch: 'loginpage' },
+                    { id: 'd', label: 'L2', x: 530, y: 200, branch: 'loginpage', isHead: true },
                 ], edges: [{ from: 'a', to: 'b' }, { from: 'b', to: 'c' }, { from: 'c', to: 'd' }]
             },
             {
                 nodes: [
-                    { id: 'a', label: 'C1', x: 80, y: 80, branch: 'main' },
-                    { id: 'b', label: 'C2', x: 200, y: 80, branch: 'main' },
-                    { id: 'c', label: 'F1', x: 280, y: 180, branch: 'feature' },
-                    { id: 'd', label: 'F2', x: 380, y: 180, branch: 'feature' },
-                    { id: 'e', label: 'M', x: 480, y: 80, branch: 'main', isMerge: true, isHead: true },
+                    { id: 'a', label: 'C1', x: 80, y: 90, branch: 'main' },
+                    { id: 'b', label: 'C2', x: 230, y: 90, branch: 'main' },
+                    { id: 'c', label: 'L1', x: 380, y: 200, branch: 'loginpage' },
+                    { id: 'd', label: 'L2', x: 530, y: 200, branch: 'loginpage' },
+                    { id: 'e', label: 'M', x: 680, y: 90, branch: 'main', isMerge: true, isHead: true },
                 ], edges: [
                     { from: 'a', to: 'b' }, { from: 'b', to: 'c' }, { from: 'c', to: 'd' },
                     { from: 'b', to: 'e' }, { from: 'd', to: 'e' }
@@ -385,9 +403,10 @@ export const MODULES = [
             lines: [
                 'A remote is a version of your repo hosted on the internet.',
                 'GitHub, GitLab, and Bitbucket host remotes.',
-                'git remote add origin <url> → links local to remote.',
-                'git push origin main → uploads your commits.',
-                'git pull → fetch + merge remote changes into local.',
+                'git remote add origin <url>  →  links local to remote.',
+                'git push origin main  →  uploads commits to remote server.',
+                '  ↳ push: upload | origin: remote server | main: branch name',
+                'git pull  →  fetch + merge remote changes into local.',
             ],
             ascii: `
  Local Repo          GitHub Remote
@@ -450,7 +469,7 @@ export const MODULES = [
                 'A Pull Request (PR) proposes your branch changes to be merged.',
                 'Team members review your code before it lands in main.',
                 'PRs are a GitHub/GitLab concept, not core Git.',
-                'Workflow: branch → commit → push → open PR → review → merge.',
+                'Workflow: branch  ────────►  commit  ────────►  push  ────────►  open PR  ────────►  review  ────────►  merge.',
                 'Good PRs have a clear title, description, and small diff.',
             ],
             ascii: `
@@ -462,9 +481,9 @@ export const MODULES = [
                 id: 'c1',
                 type: 'order',
                 question: 'Arrange the Pull Request workflow in order:',
-                items: ['Open PR on GitHub', 'git push origin feature-x', 'git commit -m "feat: add login"', 'git checkout -b feature-x', 'Team reviews & approves', 'PR merged to main'],
-                correct: ['git checkout -b feature-x', 'git commit -m "feat: add login"', 'git push origin feature-x', 'Open PR on GitHub', 'Team reviews & approves', 'PR merged to main'],
-                hints: ['Create branch → commit → push → PR → review → merge'],
+                items: ['Open PR on GitHub', 'git push origin loginpage', 'git commit -m "feat: add login"', 'git checkout -b loginpage', 'Team reviews & approves', 'PR merged to main'],
+                correct: ['git checkout -b loginpage', 'git commit -m "feat: add login"', 'git push origin loginpage', 'Open PR on GitHub', 'Team reviews & approves', 'PR merged to main'],
+                hints: ['Create branch  ────────►  commit  ────────►  push  ────────►  PR  ────────►  review  ────────►  merge'],
                 xp: 80,
             },
             {
@@ -516,7 +535,7 @@ export const MODULES = [
                 'A conflict happens when two branches changed the same line.',
                 'Git marks the conflicting section with <<<, ===, >>> markers.',
                 'You manually edit the file to choose what to keep.',
-                'Then: git add <file> → git commit to complete the merge.',
+                'Then: git add <file>  ────────►  git commit to complete the merge.',
                 'Prevention: pull often, keep branches short-lived.',
             ],
             ascii: `
@@ -524,21 +543,21 @@ export const MODULES = [
  console.log("Hello")     ← your version
  =======
  console.log("Hi World")  ← incoming version
- >>>>>>> feature
+ >>>>>>> loginpage
       `
         },
         challenges: [
             {
                 id: 'c1',
                 type: 'fix_conflict',
-                description: 'A merge conflict occurred. Resolve it by keeping the FEATURE branch version.',
+                description: 'A merge conflict occurred. Resolve it by keeping the LOGINPAGE branch version.',
                 conflictText: `<<<<<<< HEAD
 console.log("Hello from main")
 =======
-console.log("Hello from feature")
->>>>>>> feature`,
-                correct: 'console.log("Hello from feature")',
-                hints: ['Remove the conflict markers', 'Keep only the feature version'],
+console.log("Hello from loginpage")
+>>>>>>> loginpage`,
+                correct: 'console.log("Hello from loginpage")',
+                hints: ['Remove the conflict markers', 'Keep only the loginpage version'],
                 xp: 100,
             },
             {
@@ -583,24 +602,24 @@ console.log("Hello from feature")
             lines: [
                 'Rebase moves your branch commits to start from a new base.',
                 'It creates a linear history — no merge commits.',
-                'git rebase main → replays your commits on top of main.',
-                'git rebase -i → interactive rebase (squash, edit, reorder).',
+                'git rebase main  ────────►  replays your commits on top of main.',
+                'git rebase -i  ────────►  interactive rebase (squash, edit, reorder).',
                 'Golden rule: never rebase shared/public branches!',
             ],
             ascii: `
  Before:  main ──●──●     After:  main ──●──●──●──●
-                  \\                              feature
-                   ●──● (feature)    (linear!)
+                  \\                              loginpage
+                   ●──● (loginpage)    (linear!)
       `
         },
         challenges: [
             {
                 id: 'c1',
                 type: 'terminal',
-                instruction: 'You are on "feature" branch. Rebase it on top of main.',
-                prompt: 'project/ (feature)',
+                instruction: 'You are on "loginpage" branch. Rebase it on top of main.',
+                prompt: 'project/ (loginpage)',
                 expected: ['git rebase main'],
-                successMsg: 'Feature branch replayed on top of main! Linear history achieved.',
+                successMsg: 'loginpage branch replayed on top of main! Linear history achieved.',
                 hints: ['git rebase <base-branch>'],
                 xp: 100,
             },
@@ -630,7 +649,7 @@ console.log("Hello from feature")
                     'git commit -m "fix conflict"',
                 ],
                 correct: 2,
-                hints: ['Same pattern as merge: resolve → add → continue'],
+                hints: ['Same pattern as merge: resolve  ────────►  add  ────────►  continue'],
                 xp: 80,
             },
         ],
@@ -659,7 +678,7 @@ console.log("Hello from feature")
             ascii: `
  main   ──────────────●───────
                      / (merge)
- feature ──●──●──●──
+ loginpage ──●──●──●──
       `
         },
         challenges: [
@@ -675,7 +694,7 @@ console.log("Hello from feature")
             {
                 id: 'c2',
                 type: 'scenario',
-                situation: 'Your feature branch has 8 messy commits like "fix", "fix again", "oops". Other devs will find these noisy.',
+                situation: 'Your loginpage branch has 8 messy commits like "fix", "fix again", "oops". Other devs will find these noisy.',
                 question: 'What should you do before opening the PR?',
                 options: [
                     'Push as-is, commits are fine',
@@ -715,8 +734,8 @@ console.log("Hello from feature")
             lines: [
                 'Fork: copy someone\'s repo to your GitHub account.',
                 'Clone: download your fork to your local machine.',
-                'Create a feature branch, commit, push to YOUR fork.',
-                'Open a PR from your fork → upstream repo.',
+                'Create a loginpage branch, commit, push to YOUR fork.',
+                'Open a PR from your fork  ────────►  upstream repo.',
                 'Good first issues are labeled "good first issue" on GitHub.',
             ],
             ascii: `
@@ -813,10 +832,10 @@ export const CHEAT_SHEET = [
     {
         category: "Branching & Merging",
         commands: [
-            { cmd: "git branch", desc: "List, create, or delete branches", examples: ["git branch", "git branch new-feature", "git branch -d old-branch"] },
+            { cmd: "git branch", desc: "List, create, or delete branches", examples: ["git branch", "git branch loginpage", "git branch -d old-branch"] },
             { cmd: "git checkout", desc: "Switch branches or restore working tree files", examples: ["git checkout main", "git checkout -b new-branch", "git checkout -- filename"] },
             { cmd: "git switch", desc: "Switch to a different branch", examples: ["git switch main", "git switch -c new-branch"] },
-            { cmd: "git merge", desc: "Join two or more development histories together", examples: ["git merge feature-branch", "git merge --no-ff feature-branch"] },
+            { cmd: "git merge", desc: "Join two or more development histories together", examples: ["git merge loginpage", "git merge --no-ff loginpage"] },
             { cmd: "git rebase", desc: "Reapply commits on top of another base tip", examples: ["git rebase main", "git rebase -i HEAD~3"] },
         ]
     },
@@ -826,7 +845,7 @@ export const CHEAT_SHEET = [
             { cmd: "git remote", desc: "Manage set of tracked repositories", examples: ["git remote -v", "git remote add origin url", "git remote remove origin"] },
             { cmd: "git fetch", desc: "Download objects and refs from another repository", examples: ["git fetch", "git fetch origin", "git fetch --all"] },
             { cmd: "git pull", desc: "Fetch from and integrate with another repository or local branch", examples: ["git pull", "git pull origin main", "git pull --rebase"] },
-            { cmd: "git push", desc: "Update remote refs along with associated objects", examples: ["git push", "git push origin main", "git push -u origin feature-branch"] },
+            { cmd: "git push", desc: "Update remote refs along with associated objects", examples: ["git push", "git push origin main", "git push -u origin loginpage"] },
         ]
     },
     {
@@ -871,10 +890,50 @@ export const CHEAT_SHEET = [
         ]
     },
     {
-        category: "Repository Maintenance",
+        category: "Modern Alternatives",
         commands: [
-            { cmd: "git gc", desc: "Cleanup unnecessary files and optimize the local repository", examples: ["git gc", "git gc --aggressive"] },
-            { cmd: "git fsck", desc: "Verify the connectivity and validity of objects in the database", examples: ["git fsck", "git fsck --full"] },
+            { cmd: "git restore", desc: "Restore working tree files", examples: ["git restore filename", "git restore --staged filename"] },
+            { cmd: "git switch", desc: "Switch to a different branch", examples: ["git switch main", "git switch -c loginpage"] },
         ]
     },
+    {
+        category: "Submodules & Worktrees",
+        commands: [
+            { cmd: "git submodule", desc: "Initialize, update or inspect submodules", examples: ["git submodule add url", "git submodule update --init"] },
+            { cmd: "git worktree", desc: "Manage multiple working trees", examples: ["git worktree add ../path branch", "git worktree list"] },
+            { cmd: "git sparse-checkout", desc: "Reduce working tree to a subset of directories", examples: ["git sparse-checkout init", "git sparse-checkout set dir/"] },
+        ]
+    },
+    {
+        category: "Collaboration & Patching",
+        commands: [
+            { cmd: "git format-patch", desc: "Prepare patches for e-mail submission", examples: ["git format-patch main", "git format-patch -1 HEAD"] },
+            { cmd: "git am", desc: "Apply a series of patches from a mailbox", examples: ["git am patch-file.patch", "git am --continue"] },
+            { cmd: "git shortlog", desc: "Summarize git log output", examples: ["git shortlog", "git shortlog -sn"] },
+        ]
+    },
+    {
+        category: "Internal Inspection",
+        commands: [
+            { cmd: "git grep", desc: "Print lines matching a pattern", examples: ["git grep \"search-term\"", "git grep -n \"term\""] },
+            { cmd: "git describe", desc: "Give an object a human readable name based on an available ref", examples: ["git describe", "git describe --tags"] },
+            { cmd: "git rev-parse", desc: "Pick out and massage parameters", examples: ["git rev-parse --show-toplevel", "git rev-parse HEAD"] },
+        ]
+    },
+    {
+        category: "Advanced Utility",
+        commands: [
+            { cmd: "git archive", desc: "Create an archive of files from a named tree", examples: ["git archive --format=zip HEAD > project.zip"] },
+            { cmd: "git instaweb", desc: "Instantly browse your working repository in gitweb", examples: ["git instaweb", "git instaweb --stop"] },
+            { cmd: "git notes", desc: "Add or inspect object notes", examples: ["git notes add -m \"Comment\"", "git notes show"] },
+        ]
+    },
+    {
+        category: "Deep Maintenance",
+        commands: [
+            { cmd: "git maintenance", desc: "Run tasks to keep repository optimized", examples: ["git maintenance start", "git maintenance run"] },
+            { cmd: "git prune", desc: "Prune all unreachable objects from the object database", examples: ["git prune", "git prune --dry-run"] },
+            { cmd: "git count-objects", desc: "Count unpacked number of objects and their disk consumption", examples: ["git count-objects -v"] },
+        ]
+    }
 ];
