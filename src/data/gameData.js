@@ -327,16 +327,17 @@ export const MODULES = [
             {
                 id: 'c1',
                 type: 'scenario',
+                forceMCQ: true,
                 situation: 'You have finished work on "loginpage" branch. You want to bring those changes into main.',
                 question: 'What is the CORRECT sequence of commands?',
                 options: [
                     'git merge loginpage (while on loginpage)',
-                    'git checkout main  ────────►  git merge loginpage',
-                    'git push loginpage  ────────►  git pull main',
+                    'git checkout main → git merge loginpage',
+                    'git push loginpage → git pull main',
                     'git merge main (while on loginpage)',
                 ],
                 correct: 1,
-                hints: ['You must be ON the target branch', 'checkout main, then merge the loginpage INTO it'],
+                hints: ['You must be ON the target branch', 'checkout main → merge the loginpage INTO it'],
                 xp: 80,
             },
             {
@@ -494,7 +495,7 @@ export const MODULES = [
                 question: 'How do you update the PR with your fix?',
                 options: [
                     'Close the PR and open a new one',
-                    'git commit the fix, then git push — the PR updates automatically',
+                    'git commit the fix → git push — the PR updates automatically',
                     'Email the reviewer directly',
                     'git merge the fix manually',
                 ],
@@ -564,15 +565,16 @@ console.log("Hello from loginpage")
             {
                 id: 'c2',
                 type: 'multiple_choice',
+                forceMCQ: true,
                 question: 'After manually resolving a conflict in a file, what is the next step?',
                 options: [
                     'git merge --done',
-                    'git add <file>, then git commit',
+                    'git add <file> → git commit',
                     'git checkout --ours',
                     'git push immediately',
                 ],
                 correct: 1,
-                hints: ['Stage the resolved file then commit the merge'],
+                hints: ['Stage the resolved file → commit the merge'],
                 xp: 80,
             },
             {
@@ -766,16 +768,17 @@ console.log("Hello from loginpage")
                     'git push origin my-fix',
                     'Open a PR to the upstream repo',
                 ],
-                hints: ['Fork first, then clone YOUR fork', 'Push to fork, then open PR'],
+                hints: ['Fork first → clone YOUR fork', 'Push to fork → open PR'],
                 xp: 120,
             },
             {
                 id: 'c2',
                 type: 'multiple_choice',
+                forceMCQ: true,
                 question: 'You want to keep your fork in sync with the upstream repo. What do you add?',
                 options: [
                     'git remote add origin <upstream-url>',
-                    'git remote add upstream <upstream-url> then git fetch upstream',
+                    'git remote add upstream <upstream-url> → git fetch upstream',
                     'git sync upstream',
                     'Only forks with push access can sync',
                 ],
