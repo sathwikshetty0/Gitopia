@@ -17,6 +17,7 @@ export const initialState = {
         gitProfile: '',
         totalCommandsRun: 0,
         hintsUsed: 0,
+        hasClaimedCertificate: false,
     },
     currentMissionXP: 0,      // XP accumulated in current mission run
     earnedBadge: null,        // badge just unlocked (for animation)

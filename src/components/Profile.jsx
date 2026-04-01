@@ -13,6 +13,8 @@ export default function Profile({ player, dispatch }) {
         color: 'var(--text)', fontFamily: 'var(--font-code)',
         fontSize: '0.85rem', outline: 'none',
         transition: 'border-color 0.2s',
+        opacity: player.hasClaimedCertificate ? 0.6 : 1,
+        cursor: player.hasClaimedCertificate ? 'not-allowed' : 'text',
     };
 
     const { current, next } = getLevelInfo(player.xp);
@@ -110,11 +112,14 @@ export default function Profile({ player, dispatch }) {
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <div>
-                                <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', display: 'block', marginBottom: '0.4rem' }}>USERNAME</label>
+                                <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', display: 'block', marginBottom: '0.4rem' }}>
+                                    USERNAME {player.hasClaimedCertificate && '🔒'}
+                                </label>
                                 <input
                                     type="text"
                                     value={editName}
                                     maxLength={20}
+                                    disabled={player.hasClaimedCertificate}
                                     onChange={e => setEditName(e.target.value)}
                                     placeholder="Hacker name"
                                     style={inputStyle}
@@ -122,10 +127,13 @@ export default function Profile({ player, dispatch }) {
                             </div>
 
                             <div>
-                                <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', display: 'block', marginBottom: '0.4rem' }}>EMAIL ADDRESS</label>
+                                <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', display: 'block', marginBottom: '0.4rem' }}>
+                                    EMAIL ADDRESS {player.hasClaimedCertificate && '🔒'}
+                                </label>
                                 <input
                                     type="email"
                                     value={editEmail}
+                                    disabled={player.hasClaimedCertificate}
                                     onChange={e => setEditEmail(e.target.value)}
                                     placeholder="your@email.com"
                                     style={inputStyle}
@@ -133,22 +141,26 @@ export default function Profile({ player, dispatch }) {
                             </div>
 
                             <div>
-                                <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', display: 'block', marginBottom: '0.4rem' }}>GIT PROFILE URL</label>
+                                <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', display: 'block', marginBottom: '0.4rem' }}>
+                                    GITHUB HANDLE {player.hasClaimedCertificate && '🔒'}
+                                </label>
                                 <input
                                     type="text"
                                     value={editGit}
+                                    disabled={player.hasClaimedCertificate}
                                     onChange={e => setEditGit(e.target.value)}
-                                    placeholder="https://github.com/..."
+                                    placeholder="@username"
                                     style={inputStyle}
                                 />
                             </div>
 
                             <button
-                                className="btn btn-primary w-full"
+                                className={player.hasClaimedCertificate ? "btn btn-dim w-full" : "btn btn-primary w-full"}
                                 style={{ marginTop: '0.5rem', padding: '0.75rem', fontSize: '0.75rem' }}
                                 onClick={saveInfo}
+                                disabled={player.hasClaimedCertificate}
                             >
-                                UPDATE REGISTRY
+                                {player.hasClaimedCertificate ? "🔒 IDENTITY LOCKED" : "UPDATE REGISTRY"}
                             </button>
                         </div>
                     </motion.div>

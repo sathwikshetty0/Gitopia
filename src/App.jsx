@@ -106,7 +106,7 @@ export default function App() {
 
           {view === 'certification' && (
             <motion.div key="certification" {...PAGE_TRANSITION}>
-              <Certification player={player} onBack={() => dispatch({ type: 'SET_VIEW', payload: 'dashboard' })} />
+              <Certification player={player} dispatch={dispatch} onBack={() => dispatch({ type: 'SET_VIEW', payload: 'dashboard' })} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -259,7 +259,7 @@ function SecurityShield() {
       }}>
         {Array.from({ length: 16 }).map((_, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            PRIVATE_GITOPIA_V2.0_ENCRYPTED
+            PRIVATE_GITOPIA_ENCRYPTED
           </div>
         ))}
       </div>

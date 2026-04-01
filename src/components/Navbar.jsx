@@ -30,9 +30,6 @@ export default function Navbar({ view, player, dispatch }) {
                 <div className="pixel neon-text" style={{ fontSize: '0.85rem' }}>
                     Gitopia
                 </div>
-                <span className="badge badge-neon" style={{ fontSize: '0.65rem', padding: '0.2rem 0.6rem' }}>
-                    v2.0
-                </span>
             </div>
 
             {/* Navigation Links */}
