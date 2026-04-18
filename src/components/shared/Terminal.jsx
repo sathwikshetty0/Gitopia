@@ -8,6 +8,7 @@ export function Terminal({ prompt = 'project/', expected = [], onSuccess, onErro
     const [hintsShown, setHintsShown] = useState(0);
     const [solved, setSolved] = useState(false);
     const [flash, setFlash] = useState(null); // 'success' | 'error'
+    const [wrongCount, setWrongCount] = useState(0);
     const inputRef = useRef(null);
     const bottomRef = useRef(null);
 
@@ -43,6 +44,11 @@ export function Terminal({ prompt = 'project/', expected = [], onSuccess, onErro
         } else if (!isCorrect && trimmed !== '') {
             setFlash('error');
             setTimeout(() => setFlash(null), 600);
+            setWrongCount(w => {
+                const nw = w + 1;
+                if (nw === 3 && hintsShown === 0) setHintsShown(1);
+                return nw;
+            });
             onError && onError(trimmed);
         }
     };
@@ -120,7 +126,7 @@ export function Terminal({ prompt = 'project/', expected = [], onSuccess, onErro
                 </div>
             )}
 
-            {hints.length > 0 && !solved && (
+            {hints.length > 0 && !solved && (wrongCount >= 3 || hintsShown > 0) && (
                 <div style={{ padding: '0.3rem 1rem 0.7rem', borderTop: '1px solid #222' }}>
                     <button
                         className="btn text-xs"

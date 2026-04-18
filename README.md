@@ -56,7 +56,26 @@ The aesthetic is inspired by **Hacknet**, **GitHub CLI**, and cyberpunk HUD dash
 | `fix_conflict` | Edit a merge conflict and remove all markers |
 
 ### 🏆 Progression System
-- **12 levels**: Git Rookie → Commit Cadet → Branch Scout → … → Git God
+
+**12 Ranks & Required XP:**
+
+| Rank | Title | Required XP |
+|------|-------|-------------|
+| 1 | Git Rookie | 0 XP |
+| 2 | Commit Cadet | 150 XP |
+| 3 | Branch Scout | 400 XP |
+| 4 | Merge Apprentice | 750 XP |
+| 5 | Commit Knight | 1200 XP |
+| 6 | Branch Paladin | 1700 XP |
+| 7 | Rebase Ranger | 2200 XP |
+| 8 | Conflict Slayer | 2700 XP |
+| 9 | Remote Warrior | 3300 XP |
+| 10 | Merge Master | 3900 XP |
+| 11 | Git Ninja | 4300 XP |
+| 12 | Git God | 4600 XP |
+
+*Note: Achieving "Git God" requires acquiring maximum available XP across all modules. Requesting hints will drain XP!*
+
 - **11 badges**: one per module + completion badge
 - **Streak counter**: days in a row
 - **Stats**: commands run, hints used, missions completed

@@ -370,7 +370,11 @@ function MCQChallenge({ challenge, onComplete }) {
         if (isCorrect) {
             onComplete(challenge.xp, wrongCount * 5 + hintsShown * 10);
         } else {
-            setWrongCount(c => c + 1);
+            setWrongCount(c => {
+                const newC = c + 1;
+                if (newC === 3 && hintsShown === 0) setHintsShown(1);
+                return newC;
+            });
             setTimeout(() => {
                 setResult(null);
                 setSelected(isCommand ? '' : null);
@@ -408,7 +412,6 @@ function MCQChallenge({ challenge, onComplete }) {
                     let bg = 'rgba(255,255,255,0.03)', border = '#3d444d', color = 'var(--text)';
                     
                     if (result === 'correct' && i === challenge.correct) { bg = 'rgba(57,255,20,0.12)'; border = 'var(--neon)'; color = 'var(--neon)'; }
-                    if (result === 'wrong' && i === challenge.correct) { bg = 'rgba(57,255,20,0.08)'; border = 'var(--neon)'; color = 'var(--neon)'; }
                     if (result === 'wrong' && !isCommand && i === selected && i !== challenge.correct) { bg = 'rgba(255,77,77,0.12)'; border = 'var(--red)'; color = 'var(--red)'; }
                     if (!result && !isCommand && i === selected) { bg = 'rgba(88,166,255,0.10)'; border = 'var(--blue)'; color = 'var(--blue)'; }
 
@@ -479,7 +482,7 @@ function MCQChallenge({ challenge, onComplete }) {
                 </div>
             )}
 
-            <HintRow hints={challenge.hints} hintsShown={hintsShown} setHintsShown={setHintsShown} />
+            <HintRow hints={challenge.hints} hintsShown={hintsShown} setHintsShown={setHintsShown} wrongCount={wrongCount} />
 
             <button
                 className="btn btn-primary w-full"
@@ -527,7 +530,11 @@ function OrderChallenge({ challenge, onComplete }) {
         if (correct) {
             onComplete(challenge.xp, wrongCount * 5 + hintsShown * 10);
         } else {
-            setWrongCount(c => c + 1);
+            setWrongCount(c => {
+                const newC = c + 1;
+                if (newC === 3 && hintsShown === 0) setHintsShown(1);
+                return newC;
+            });
             setTimeout(() => setFeedback(null), 2000);
         }
     };
@@ -602,7 +609,7 @@ function OrderChallenge({ challenge, onComplete }) {
                 ))}
             </div>
 
-            <HintRow hints={challenge.hints} hintsShown={hintsShown} setHintsShown={setHintsShown} />
+            <HintRow hints={challenge.hints} hintsShown={hintsShown} setHintsShown={setHintsShown} wrongCount={wrongCount} />
 
             <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
                 <button className="btn" onClick={clearAll} style={{ whiteSpace: 'nowrap' }}>
@@ -636,7 +643,11 @@ function FixCommandChallenge({ challenge, onComplete }) {
         if (isCorrect) {
             onComplete(challenge.xp, wrongCount * 5 + hintsShown * 10);
         } else {
-            setWrongCount(c => c + 1);
+            setWrongCount(c => {
+                const newC = c + 1;
+                if (newC === 3 && hintsShown === 0) setHintsShown(1);
+                return newC;
+            });
             setTimeout(() => setFeedback(null), 1500);
         }
     };
@@ -679,7 +690,7 @@ function FixCommandChallenge({ challenge, onComplete }) {
                 </div>
             </div>
 
-            <HintRow hints={challenge.hints} hintsShown={hintsShown} setHintsShown={setHintsShown} />
+            <HintRow hints={challenge.hints} hintsShown={hintsShown} setHintsShown={setHintsShown} wrongCount={wrongCount} />
 
             <button
                 className="btn btn-primary w-full"
@@ -713,7 +724,11 @@ function ConflictChallenge({ challenge, onComplete }) {
         if (correct) {
             onComplete(challenge.xp, wrongCount * 5 + hintsShown * 10);
         } else {
-            setWrongCount(c => c + 1);
+            setWrongCount(c => {
+                const newC = c + 1;
+                if (newC === 3 && hintsShown === 0) setHintsShown(1);
+                return newC;
+            });
             setTimeout(() => setFeedback(null), 2000);
         }
     };
@@ -775,7 +790,7 @@ function ConflictChallenge({ challenge, onComplete }) {
                 )}
             </AnimatePresence>
 
-            <HintRow hints={challenge.hints} hintsShown={hintsShown} setHintsShown={setHintsShown} />
+            <HintRow hints={challenge.hints} hintsShown={hintsShown} setHintsShown={setHintsShown} wrongCount={wrongCount} />
 
             <button
                 className="btn btn-primary w-full"
@@ -838,8 +853,9 @@ function BriefingLine({ text }) {
 }
 
 // ── Shared Hint Row ───────────────────────────────
-function HintRow({ hints, hintsShown, setHintsShown }) {
+function HintRow({ hints, hintsShown, setHintsShown, wrongCount = 0 }) {
     if (!hints || hints.length === 0) return null;
+    if (wrongCount < 3 && hintsShown === 0) return null;
     return (
         <div>
             <button
