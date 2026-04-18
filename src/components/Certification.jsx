@@ -333,9 +333,12 @@ export default function Certification({ player, dispatch, onBack }) {
   const [form, setForm] = useState({
     username: '',
     email: player.email || '',
-    gitProfile: player.gitProfile || ''
+    gitProfile: player.gitProfile || '',
+    feedback: player.feedback || '',
+    section: player.section || ''
   });
   const [nameError, setNameError] = useState(false);
+  const [feedbackError, setFeedbackError] = useState(false);
 
   const handleExport = () => {
     const originalTitle = document.title;
@@ -355,6 +358,14 @@ export default function Certification({ player, dispatch, onBack }) {
       alert("Email is required for certification.");
       return;
     }
+    if (!form.section.trim()) {
+      alert("Section is required for certification.");
+      return;
+    }
+    if ((form.feedback || '').trim().length < 100) {
+      setFeedbackError(true);
+      return;
+    }
     dispatch({ 
       type: 'UPDATE_PLAYER_INFO', 
       payload: { ...form, username: form.username.trim(), hasClaimedCertificate: true } 
@@ -367,7 +378,7 @@ export default function Certification({ player, dispatch, onBack }) {
     if (showVerify) return; // Wait until verified to sync
 
     const syncData = async () => {
-      const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzcDskqqM8kqAtkrNIBDk1X2cLfXjl5z0O8BDJbdPYPuXT5RaLmojn8o-P67ZjOmptydQ/exec';
+      const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzhoECpyoOAHMmaokq0dTdkeyZCtVlg23W0MnJDm73rmAYuHIEyLn05Mp_u1R_hC32B/exec';
 
       try {
         await fetch(GOOGLE_SHEETS_URL, {
@@ -377,9 +388,11 @@ export default function Certification({ player, dispatch, onBack }) {
           body: JSON.stringify({
             name: player.username,
             email: player.email || 'N/A',
+            section: player.section || 'N/A',
             score: player.xp,
             rank: current.title,
             github: player.gitProfile || 'N/A',
+            feedback: player.feedback || 'N/A',
             date: new Date().toISOString()
           })
         });
@@ -437,6 +450,16 @@ export default function Certification({ player, dispatch, onBack }) {
             </div>
 
             <div className="verify-group">
+              <label className="verify-label">Section (Required)</label>
+              <input 
+                className="verify-input"
+                value={form.section}
+                onChange={e => setForm({...form, section: e.target.value})}
+                placeholder="e.g. A, B, or Batch Name"
+              />
+            </div>
+
+            <div className="verify-group">
               <label className="verify-label">GitHub Handle (Optional)</label>
               <input 
                 className="verify-input"
@@ -444,6 +467,25 @@ export default function Certification({ player, dispatch, onBack }) {
                 onChange={e => setForm({...form, gitProfile: e.target.value})}
                 placeholder="@username"
               />
+            </div>
+
+            <div className="verify-group">
+              <label className="verify-label">Feedback (Minimum 100 characters) <span style={{ color: '#ff4444' }}>*</span></label>
+              <textarea 
+                className="verify-input"
+                style={feedbackError ? { resize: 'vertical', minHeight: '80px', fontFamily: 'inherit', boxSizing: 'border-box', borderColor: '#ff4444', background: 'rgba(255,68,68,0.08)' } : { resize: 'vertical', minHeight: '80px', fontFamily: 'inherit', boxSizing: 'border-box' }}
+                value={form.feedback}
+                onChange={e => { setFeedbackError(false); setForm({...form, feedback: e.target.value}); }}
+                placeholder="Share your thoughts about Gitopia (at least 100 characters)..."
+              />
+              <div style={{ textAlign: 'right', fontSize: '0.75rem', color: (form.feedback || '').length < 100 ? '#ff4444' : '#39ff14', marginTop: '0.3rem', fontFamily: 'DM Mono, monospace' }}>
+                {(form.feedback || '').length} / 100
+              </div>
+              {feedbackError && (
+                <p style={{ color: '#ff4444', fontSize: '0.8rem', marginTop: '0.4rem', fontFamily: 'DM Mono, monospace' }}>
+                  FEEDBACK_TOO_SHORT — Please provide at least 100 characters.
+                </p>
+              )}
             </div>
 
             <button 

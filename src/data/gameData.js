@@ -4,17 +4,17 @@
 
 export const LEVELS = [
     { level: 1, minXP: 0, title: 'Git Rookie' },
-    { level: 2, minXP: 100, title: 'Commit Cadet' },
-    { level: 3, minXP: 250, title: 'Branch Scout' },
-    { level: 4, minXP: 500, title: 'Merge Apprentice' },
-    { level: 5, minXP: 800, title: 'Commit Knight' },
-    { level: 6, minXP: 1200, title: 'Branch Paladin' },
-    { level: 7, minXP: 1700, title: 'Rebase Ranger' },
-    { level: 8, minXP: 2300, title: 'Conflict Slayer' },
-    { level: 9, minXP: 3000, title: 'Remote Warrior' },
-    { level: 10, minXP: 3800, title: 'Merge Master' },
-    { level: 15, minXP: 6000, title: 'Git Ninja' },
-    { level: 20, minXP: 10000, title: 'Git God' },
+    { level: 2, minXP: 150, title: 'Commit Cadet' },
+    { level: 3, minXP: 400, title: 'Branch Scout' },
+    { level: 4, minXP: 750, title: 'Merge Apprentice' },
+    { level: 5, minXP: 1200, title: 'Commit Knight' },
+    { level: 6, minXP: 1700, title: 'Branch Paladin' },
+    { level: 7, minXP: 2200, title: 'Rebase Ranger' },
+    { level: 8, minXP: 2700, title: 'Conflict Slayer' },
+    { level: 9, minXP: 3300, title: 'Remote Warrior' },
+    { level: 10, minXP: 3900, title: 'Merge Master' },
+    { level: 15, minXP: 4300, title: 'Git Ninja' },
+    { level: 20, minXP: 4600, title: 'Git God' },
 ];
 
 export function getLevelInfo(xp) {
