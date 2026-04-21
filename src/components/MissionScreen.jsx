@@ -122,6 +122,8 @@ function BriefingPhase({ mission, dispatch }) {
                     {mission.briefing.title}
                 </div>
 
+                {(mission.id === 'git_foundations' || mission.id === 'remotes') && <GitVsGithubPanel />}
+
                 {/* Animated bullet lines */}
                 <div style={{ marginBottom: '1.5rem' }}>
                     {mission.briefing.lines.map((line, i) => (
@@ -1039,6 +1041,40 @@ function RewardPhase({ mission, totalXP, actualGainedXP, earnedBadge, dispatch }
                     </motion.button>
                 </div>
             </motion.div>
+        </div>
+    );
+}
+
+// ── Visual Rep: Git vs GitHub ────────────────────
+function GitVsGithubPanel() {
+    return (
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div style={{ flex: 1, padding: '1.25rem', background: 'rgba(57,255,20,0.06)', border: '1px solid rgba(57,255,20,0.3)', borderRadius: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                    <span style={{ fontSize: '1.8rem' }}>💻</span>
+                    <div className="pixel" style={{ color: 'var(--neon)', fontSize: '0.75rem' }}>GIT</div>
+                </div>
+                <div className="dim-text text-xs" style={{ marginBottom: '0.5rem', fontWeight: 'bold' }}>The Local Engine</div>
+                <ul className="dim-text text-xs" style={{ paddingLeft: '1.2rem', lineHeight: 1.6, margin: 0 }}>
+                    <li>Installed locally on your computer</li>
+                    <li>Saves versions & tracks history</li>
+                    <li>Works 100% offline</li>
+                    <li>Command-line software</li>
+                </ul>
+            </div>
+            <div style={{ flex: 1, padding: '1.25rem', background: 'rgba(88,166,255,0.06)', border: '1px solid rgba(88,166,255,0.3)', borderRadius: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                    <span style={{ fontSize: '1.8rem' }}>☁️</span>
+                    <div className="pixel" style={{ color: 'var(--blue)', fontSize: '0.75rem' }}>GITHUB</div>
+                </div>
+                <div className="dim-text text-xs" style={{ marginBottom: '0.5rem', fontWeight: 'bold' }}>The Cloud Service</div>
+                <ul className="dim-text text-xs" style={{ paddingLeft: '1.2rem', lineHeight: 1.6, margin: 0 }}>
+                    <li>Hosted on the web internet</li>
+                    <li>Centralizes teamwork & PRs</li>
+                    <li>Requires internet connection</li>
+                    <li>Visual UI website (GitHub.com)</li>
+                </ul>
+            </div>
         </div>
     );
 }
