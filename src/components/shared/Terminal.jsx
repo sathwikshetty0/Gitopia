@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Simulated / interactive terminal component
-export function Terminal({ prompt = 'project/', expected = [], onSuccess, onError, hints = [], disabled = false }) {
+export function Terminal({ prompt = 'project/', expected = [], onSuccess, onError, onHint, hints = [], disabled = false }) {
     const [history, setHistory] = useState([]);
     const [input, setInput] = useState('');
     const [hintsShown, setHintsShown] = useState(0);
@@ -55,7 +55,9 @@ export function Terminal({ prompt = 'project/', expected = [], onSuccess, onErro
 
     const showHint = () => {
         if (hintsShown < hints.length) {
-            setHintsShown(h => h + 1);
+            const next = hintsShown + 1;
+            setHintsShown(next);
+            onHint && onHint(next);
         }
     };
 
