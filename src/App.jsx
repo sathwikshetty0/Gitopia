@@ -24,9 +24,9 @@ function loadState() {
 }
 
 const PAGE_TRANSITION = {
-  initial: { opacity: 0, y: 12 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.25 } },
-  exit: { opacity: 0, y: -8, transition: { duration: 0.15 } },
+  initial: { opacity: 0, y: 16 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] } },
+  exit: { opacity: 0, y: -10, transition: { duration: 0.15 } },
 };
 
 export default function App() {
@@ -119,40 +119,88 @@ export default function App() {
 }
 
 function MissionProgressStrip({ missionPhase, dispatch }) {
+  const phases = [
+    { id: 'briefing', label: 'BRIEFING', icon: '📋' },
+    { id: 'challenge', label: 'CHALLENGE', icon: '⚔️' },
+    { id: 'reward', label: 'REWARD', icon: '🏆' },
+  ];
+  const currentIdx = phases.findIndex(p => p.id === missionPhase);
   const pct = missionPhase === 'briefing' ? 20 : missionPhase === 'challenge' ? 60 : 100;
-  const label = missionPhase === 'briefing' ? 'Phase 1/3: BRIEFING'
-    : missionPhase === 'challenge' ? 'Phase 2/3: CHALLENGE'
-      : 'Phase 3/3: REWARD';
 
   return (
     <div style={{
-      padding: '0.45rem 1.5rem',
-      background: 'rgba(13,17,23,0.98)',
-      borderBottom: '1px solid rgba(255,77,77,0.25)',
+      padding: '0.5rem 1.5rem',
+      background: 'rgba(10,14,20,0.95)',
+      borderBottom: '1px solid rgba(255,77,77,0.15)',
       display: 'flex', alignItems: 'center', gap: '1rem',
       position: 'sticky', top: 0, zIndex: 100,
+      backdropFilter: 'blur(16px)',
     }}>
-      <button
+      <motion.button
         onClick={() => dispatch({ type: 'RETURN_TO_DASHBOARD' })}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         style={{
-          background: 'none', border: '1px solid #444', borderRadius: '4px',
+          background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px',
           color: 'var(--text-dim)', fontFamily: 'var(--font-code)',
-          fontSize: '0.7rem', padding: '0.2rem 0.6rem', cursor: 'pointer',
-          whiteSpace: 'nowrap',
+          fontSize: '0.7rem', padding: '0.25rem 0.7rem', cursor: 'pointer',
+          whiteSpace: 'nowrap', transition: 'all 0.2s',
         }}
       >
         ← EXIT
-      </button>
-      <span className="dim-text" style={{ fontSize: '0.7rem', whiteSpace: 'nowrap' }}>MISSION IN PROGRESS</span>
-      <div style={{ flex: 1, height: '4px', background: 'rgba(255,77,77,0.12)', borderRadius: '2px' }}>
-        <div style={{
-          width: `${pct}%`, height: '100%',
-          background: pct === 100 ? 'var(--neon)' : 'var(--red)',
-          borderRadius: '2px', transition: 'width 0.6s ease',
-          boxShadow: pct === 100 ? 'var(--glow-neon)' : '0 0 6px var(--red)',
-        }} />
+      </motion.button>
+
+      {/* Phase indicators */}
+      <div style={{ display: 'flex', gap: '0.3rem', alignItems: 'center' }}>
+        {phases.map((phase, i) => (
+          <div key={phase.id} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '0.25rem',
+              padding: '0.2rem 0.5rem', borderRadius: '4px',
+              background: i === currentIdx ? 'rgba(57,255,20,0.1)' : 'transparent',
+              border: i === currentIdx ? '1px solid rgba(57,255,20,0.2)' : '1px solid transparent',
+              transition: 'all 0.3s',
+            }}>
+              <span style={{ fontSize: '0.65rem' }}>{phase.icon}</span>
+              <span className="hide-mobile" style={{
+                fontSize: '0.6rem', fontFamily: 'var(--font-code)',
+                color: i < currentIdx ? 'var(--neon)' : i === currentIdx ? '#fff' : 'var(--text-dim)',
+                fontWeight: i === currentIdx ? 700 : 400,
+                letterSpacing: '0.04em',
+              }}>
+                {phase.label}
+              </span>
+            </div>
+            {i < phases.length - 1 && (
+              <div style={{
+                width: '16px', height: '1px',
+                background: i < currentIdx ? 'var(--neon)' : 'rgba(255,255,255,0.1)',
+                transition: 'background 0.3s',
+              }} />
+            )}
+          </div>
+        ))}
       </div>
-      <span className="dim-text" style={{ fontSize: '0.7rem', whiteSpace: 'nowrap' }}>{label}</span>
+
+      {/* Progress bar */}
+      <div style={{ flex: 1, height: '3px', background: 'rgba(255,255,255,0.06)', borderRadius: '2px', overflow: 'hidden' }}>
+        <motion.div
+          style={{
+            height: '100%',
+            background: pct === 100
+              ? 'linear-gradient(90deg, var(--neon), var(--blue))'
+              : 'linear-gradient(90deg, var(--red), #ff8844)',
+            borderRadius: '2px',
+            boxShadow: pct === 100 ? 'var(--glow-neon)' : '0 0 8px var(--red)',
+          }}
+          animate={{ width: `${pct}%` }}
+          transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+        />
+      </div>
+
+      <span className="dim-text" style={{ fontSize: '0.6rem', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>
+        {currentIdx + 1}/3
+      </span>
     </div>
   );
 }
@@ -221,8 +269,8 @@ function SecurityShield() {
               position: 'fixed',
               inset: 0,
               zIndex: 9999,
-              background: 'rgba(0,0,0,0.95)',
-              backdropFilter: 'blur(20px)',
+              background: 'rgba(0,0,0,0.97)',
+              backdropFilter: 'blur(30px)',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -233,7 +281,11 @@ function SecurityShield() {
               padding: '2rem'
             }}
           >
-            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚠️</div>
+            <motion.div
+              style={{ fontSize: '3rem', marginBottom: '1rem' }}
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >⚠️</motion.div>
             <div style={{ fontSize: '1.2rem', letterSpacing: '2px' }}>SECURITY_SHIELD_ACTIVE</div>
             <div className="dim-text" style={{ fontSize: '0.8rem', marginTop: '1rem', fontFamily: 'var(--font-code)' }}>
               WINDOW FOCUS LOST // CONTENT PROTECTED
@@ -251,7 +303,7 @@ function SecurityShield() {
         display: 'grid',
         gridTemplateColumns: 'repeat(4, 1fr)',
         gridTemplateRows: 'repeat(4, 1fr)',
-        opacity: 0.03,
+        opacity: 0.02,
         fontSize: '0.7rem',
         color: 'white',
         fontFamily: 'var(--font-code)',
@@ -272,28 +324,72 @@ function BackgroundDecor() {
     <div style={{
       position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden',
     }}>
-      {/* Subtle grid */}
+      {/* Animated grid with subtle pulse */}
       <div style={{
         position: 'absolute', inset: 0,
         backgroundImage: `
-          linear-gradient(rgba(57,255,20,0.025) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(57,255,20,0.025) 1px, transparent 1px)
+          linear-gradient(rgba(57,255,20,0.02) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(57,255,20,0.02) 1px, transparent 1px)
         `,
-        backgroundSize: '40px 40px',
+        backgroundSize: '50px 50px',
+        animation: 'ambient-drift 60s ease-in-out infinite alternate',
       }} />
-      {/* Radial glows */}
-      <div style={{
-        position: 'absolute', bottom: '-100px', right: '-100px',
-        width: '500px', height: '500px',
-        background: 'radial-gradient(circle, rgba(57,255,20,0.05) 0%, transparent 65%)',
-        borderRadius: '50%',
-      }} />
-      <div style={{
-        position: 'absolute', top: '-100px', left: '-100px',
-        width: '400px', height: '400px',
-        background: 'radial-gradient(circle, rgba(88,166,255,0.05) 0%, transparent 65%)',
-        borderRadius: '50%',
-      }} />
+
+      {/* Floating orbs */}
+      <motion.div
+        animate={{
+          y: [0, -30, 0],
+          x: [0, 15, 0],
+          opacity: [0.03, 0.06, 0.03],
+        }}
+        transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+        style={{
+          position: 'absolute', bottom: '-80px', right: '-80px',
+          width: '500px', height: '500px',
+          background: 'radial-gradient(circle, rgba(57,255,20,0.06) 0%, transparent 65%)',
+          borderRadius: '50%',
+        }}
+      />
+      <motion.div
+        animate={{
+          y: [0, 20, 0],
+          x: [0, -10, 0],
+          opacity: [0.03, 0.05, 0.03],
+        }}
+        transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
+        style={{
+          position: 'absolute', top: '-80px', left: '-80px',
+          width: '400px', height: '400px',
+          background: 'radial-gradient(circle, rgba(88,166,255,0.05) 0%, transparent 65%)',
+          borderRadius: '50%',
+        }}
+      />
+      <motion.div
+        animate={{
+          y: [0, -15, 0],
+          opacity: [0.02, 0.04, 0.02],
+        }}
+        transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
+        style={{
+          position: 'absolute', top: '40%', right: '20%',
+          width: '300px', height: '300px',
+          background: 'radial-gradient(circle, rgba(189,147,249,0.04) 0%, transparent 65%)',
+          borderRadius: '50%',
+        }}
+      />
+
+      {/* Moving scanline */}
+      <motion.div
+        animate={{ y: ['-100%', '200vh'] }}
+        transition={{ duration: 8, repeat: Infinity, ease: 'linear', repeatDelay: 5 }}
+        style={{
+          position: 'absolute',
+          left: 0, right: 0,
+          height: '1px',
+          background: 'linear-gradient(90deg, transparent, rgba(57,255,20,0.06), transparent)',
+          boxShadow: '0 0 20px rgba(57,255,20,0.04)',
+        }}
+      />
     </div>
   );
 }
