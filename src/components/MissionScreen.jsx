@@ -19,6 +19,18 @@ const normalizeForMatch = (str) => {
         .trim();
 };
 
+// Utility for points calculation
+const calculatePoints = (baseXP, errors, hints, timeSeconds) => {
+    const errorPenalty = errors * 5;
+    const hintPenalty = hints * 10;
+    const timePenalty = Math.floor(timeSeconds / 30) * 2;
+    const final = baseXP - errorPenalty - hintPenalty - timePenalty;
+    return {
+        score: Math.max(0, final),
+        breakdown: { errorPenalty, hintPenalty, timePenalty }
+    };
+};
+
 export default function MissionScreen({ 
     activeMissionId, missionPhase, activeChallengeIndex, 
     currentMissionXP, lastXPGain, earnedBadge, dispatch 
@@ -118,8 +130,11 @@ function BriefingPhase({ mission, dispatch }) {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div className="glass p-6">
-                <div className="pixel neon-text" style={{ fontSize: '0.58rem', marginBottom: '1.25rem' }}>
+                <div className="pixel neon-text" style={{ fontSize: '0.58rem', marginBottom: '0.25rem' }}>
                     {mission.briefing.title}
+                </div>
+                <div style={{ color: 'var(--gold)', fontSize: '0.7rem', fontWeight: 700, marginBottom: '1.25rem', fontFamily: 'var(--font-pixel)' }}>
+                    MODULE VALUE: 100 POINTS
                 </div>
 
                 {(mission.id === 'git_foundations' || mission.id === 'remotes') && <GitVsGithubPanel />}
@@ -232,10 +247,22 @@ function BriefingPhase({ mission, dispatch }) {
 function ChallengePhase({ mission, activeChallengeIndex, dispatch }) {
     const challenge = mission.challenges[activeChallengeIndex];
     const total = mission.challenges.length;
+    const [startTime] = useState(Date.now());
+    const [challengeResult, setChallengeResult] = useState(null);
 
-    const handleComplete = (xpEarned, hintPenalty = 0) => {
-        const finalXP = Math.max(0, xpEarned - hintPenalty);
-        dispatch({ type: 'CHALLENGE_COMPLETE', payload: finalXP });
+    const handleComplete = (xpEarned, penaltyData) => {
+        const timeTaken = (Date.now() - startTime) / 1000;
+        const baseXP = 100 / total;
+        const result = calculatePoints(baseXP, penaltyData.errors, penaltyData.hints, timeTaken);
+        
+        setChallengeResult({
+            score: result.score,
+            max: baseXP,
+            time: timeTaken,
+            ...result.breakdown
+        });
+
+        dispatch({ type: 'CHALLENGE_COMPLETE', payload: result.score });
 
         const isLast = activeChallengeIndex + 1 >= total;
         setTimeout(() => {
@@ -243,8 +270,9 @@ function ChallengePhase({ mission, activeChallengeIndex, dispatch }) {
                 dispatch({ type: 'FINISH_MISSION', payload: { module: mission, bonusXP: 0 } });
             } else {
                 dispatch({ type: 'NEXT_CHALLENGE' });
+                setChallengeResult(null);
             }
-        }, 800);
+        }, 3500); 
     };
 
     return (
@@ -267,12 +295,45 @@ function ChallengePhase({ mission, activeChallengeIndex, dispatch }) {
                     />
                 </div>
                 <span style={{ color: 'var(--gold)', fontSize: '0.72rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
-                    +{challenge.xp} XP
+                    VAL: {Math.round(100/total)} PTS
                 </span>
                 <span className="badge badge-blue" style={{ fontSize: '0.52rem' }}>
                     {challenge.type.replace('_', ' ').toUpperCase()}
                 </span>
             </div>
+
+            <AnimatePresence>
+                {challengeResult && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="glass"
+                        style={{
+                            position: 'absolute', inset: '60px 20px auto', zIndex: 100,
+                            padding: '1.5rem', textAlign: 'center', border: '1px solid var(--neon)',
+                            boxShadow: 'var(--glow-neon)', background: 'rgba(13,17,23,0.95)',
+                            backdropFilter: 'blur(10px)'
+                        }}
+                    >
+                        <div className="pixel neon-text" style={{ fontSize: '0.8rem', marginBottom: '1rem' }}>CHALLENGE COMPLETE</div>
+                        <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--neon)', marginBottom: '0.5rem' }}>
+                            {challengeResult.score.toFixed(1)} / {challengeResult.max.toFixed(0)}
+                        </div>
+                        <div style={{ fontSize: '0.75rem', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem', color: 'var(--text-dim)', marginBottom: '1rem' }}>
+                            <div>⏱ Time: {Math.round(challengeResult.time)}s (-{challengeResult.timePenalty})</div>
+                            <div>❌ Errors: {challengeResult.errorPenalty / 5} (-{challengeResult.errorPenalty})</div>
+                            <div>💡 Hints: {challengeResult.hintPenalty / 10} (-{challengeResult.hintPenalty})</div>
+                        </div>
+                        <div style={{ height: '4px', background: '#333', borderRadius: '2px', overflow: 'hidden' }}>
+                             <motion.div 
+                                initial={{ width: 0 }}
+                                animate={{ width: `${(challengeResult.score / challengeResult.max) * 100}%` }}
+                                style={{ height: '100%', background: 'var(--neon)' }}
+                             />
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {challenge.type === 'terminal' && (
                 <TerminalChallenge challenge={challenge} onComplete={handleComplete} />
@@ -297,11 +358,12 @@ function ChallengePhase({ mission, activeChallengeIndex, dispatch }) {
 function TerminalChallenge({ challenge, onComplete }) {
     const [hintsUsed, setHintsUsed] = useState(0);
     const [solved, setSolved] = useState(false);
+    const [wrongCount, setWrongCount] = useState(0);
 
     const handleSuccess = () => {
         if (solved) return;
         setSolved(true);
-        onComplete(challenge.xp, hintsUsed * 10);
+        onComplete(challenge.xp, { hints: hintsUsed, errors: wrongCount });
     };
 
     return (
@@ -326,6 +388,8 @@ function TerminalChallenge({ challenge, onComplete }) {
                 expected={challenge.expected}
                 hints={challenge.hints}
                 onSuccess={handleSuccess}
+                onError={() => setWrongCount(c => c + 1)}
+                onHint={h => setHintsUsed(h)}
             />
             <AnimatePresence>
                 {solved && (
@@ -338,7 +402,7 @@ function TerminalChallenge({ challenge, onComplete }) {
                             borderRadius: '6px', color: 'var(--neon)', fontSize: '0.82rem',
                         }}
                     >
-                        ✓ {challenge.successMsg}
+                        ✓ {challenge.successMsg || 'Command accepted!'}
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -379,7 +443,7 @@ function MCQChallenge({ challenge, onComplete }) {
         setResult(isCorrect ? 'correct' : 'wrong');
 
         if (isCorrect) {
-            onComplete(challenge.xp, wrongCount * 5 + hintsShown * 10);
+            onComplete(challenge.xp, { errors: wrongCount, hints: hintsShown });
         } else {
             setWrongCount(c => {
                 const newC = c + 1;
@@ -550,7 +614,7 @@ function OrderChallenge({ challenge, onComplete }) {
         const correct = JSON.stringify(sequence) === JSON.stringify(challenge.correct);
         setFeedback(correct ? 'correct' : 'wrong');
         if (correct) {
-            onComplete(challenge.xp, wrongCount * 5 + hintsShown * 10);
+            onComplete(challenge.xp, { errors: wrongCount, hints: hintsShown });
         } else {
             setWrongCount(c => {
                 const newC = c + 1;
@@ -672,7 +736,7 @@ function FixCommandChallenge({ challenge, onComplete }) {
         const isCorrect = normalizeForMatch(answer) === normalizeForMatch(challenge.correct);
         setFeedback(isCorrect ? 'correct' : 'wrong');
         if (isCorrect) {
-            onComplete(challenge.xp, wrongCount * 5 + hintsShown * 10);
+            onComplete(challenge.xp, { errors: wrongCount, hints: hintsShown });
         } else {
             setWrongCount(c => {
                 const newC = c + 1;
@@ -762,7 +826,7 @@ function ConflictChallenge({ challenge, onComplete }) {
         const correct = resolved.trim() === challenge.correct.trim();
         setFeedback(correct ? 'correct' : 'wrong');
         if (correct) {
-            onComplete(challenge.xp, wrongCount * 5 + hintsShown * 10);
+            onComplete(challenge.xp, { errors: wrongCount, hints: hintsShown });
         } else {
             setWrongCount(c => {
                 const newC = c + 1;
@@ -906,7 +970,7 @@ function HintRow({ hints, hintsShown, setHintsShown, wrongCount = 0 }) {
     if (!hints || hints.length === 0) return null;
     if (wrongCount < 3 && hintsShown === 0) return null;
     return (
-        <div>
+        <div style={{ marginTop: '0.75rem' }}>
             <button
                 className="btn"
                 style={{ borderColor: 'var(--gold)', color: 'var(--gold)', padding: '0.25rem 0.7rem', fontSize: '0.68rem' }}
@@ -943,7 +1007,7 @@ function HintRow({ hints, hintsShown, setHintsShown, wrongCount = 0 }) {
 function RewardPhase({ mission, totalXP, actualGainedXP, earnedBadge, dispatch }) {
     const badge = BADGES.find(b => b.id === earnedBadge);
     const [animatedXP, setAnimatedXP] = useState(0);
-    const isPerfect = totalXP >= mission.rewardXP;
+    const isPerfect = totalXP >= 95; // Use 95 as perfect run threshold for 100 pt standard
 
     useEffect(() => {
         if (totalXP === 0) return;
@@ -992,7 +1056,7 @@ function RewardPhase({ mission, totalXP, actualGainedXP, earnedBadge, dispatch }
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1, transition: { delay: 0.4 } }}
                 >
-                    +{animatedXP === 0 && actualGainedXP === 0 ? 0 : animatedXP} XP
+                    {animatedXP.toFixed(1)} POINTS
                 </motion.div>
 
                 <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)', marginBottom: '1.5rem' }}>
@@ -1000,10 +1064,10 @@ function RewardPhase({ mission, totalXP, actualGainedXP, earnedBadge, dispatch }
                         <span style={{ color: 'var(--blue)' }}>🛰️ REPLAY: You already earned rewards for this mission!</span>
                     )}
                     {actualGainedXP > 0 && isPerfect && (
-                        <span style={{ color: 'var(--neon)' }}>⚡ PERFECT RUN — Full XP awarded!</span>
+                        <span style={{ color: 'var(--neon)' }}>⚡ PERFECT RUN — Elite status confirmed!</span>
                     )}
                     {actualGainedXP > 0 && !isPerfect && (
-                        `${totalXP} / ${mission.rewardXP} XP earned`
+                        `Final Score: ${totalXP.toFixed(1)} / 100`
                     )}
                 </div>
 
