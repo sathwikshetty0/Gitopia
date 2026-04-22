@@ -1,35 +1,49 @@
 /* =============================================
-   GitQuest — Global Design System
+   GitQuest — Global Design System v2.0
+   Premium Cyberpunk UI Overhaul
    ============================================= */
 
 /* --- CSS Variables --- */
 :root {
-  --bg: #0d1117;
-  --bg-2: #161b22;
-  --bg-3: #21262d;
+  --bg: #0a0e14;
+  --bg-2: #12171f;
+  --bg-3: #1a2030;
+  --bg-card: rgba(16, 22, 32, 0.85);
   --neon: #39ff14;
-  --neon-dim: rgba(57, 255, 20, 0.15);
+  --neon-dim: rgba(57, 255, 20, 0.12);
+  --neon-bright: #5dff3e;
+  --cyan: #00f0ff;
+  --cyan-dim: rgba(0, 240, 255, 0.12);
   --blue: #58a6ff;
-  --blue-dim: rgba(88, 166, 255, 0.15);
+  --blue-dim: rgba(88, 166, 255, 0.12);
   --gold: #f0c040;
-  --gold-dim: rgba(240, 192, 64, 0.15);
+  --gold-dim: rgba(240, 192, 64, 0.12);
   --red: #ff4d4d;
-  --red-dim: rgba(255, 77, 77, 0.15);
+  --red-dim: rgba(255, 77, 77, 0.12);
   --purple: #bd93f9;
-  --text: #c9d1d9;
-  --text-dim: #6e7681;
-  --border: rgba(57, 255, 20, 0.2);
-  --border-blue: rgba(88, 166, 255, 0.3);
+  --purple-dim: rgba(189, 147, 249, 0.12);
+  --text: #d0d7e0;
+  --text-dim: #5a6270;
+  --border: rgba(57, 255, 20, 0.15);
+  --border-blue: rgba(88, 166, 255, 0.2);
+  --border-subtle: rgba(255, 255, 255, 0.06);
   --radius: 8px;
-  --radius-lg: 12px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
 
   --font-pixel: 'Press Start 2P', cursive;
   --font-code: 'Fira Code', monospace;
 
-  --glow-neon: 0 0 8px rgba(57, 255, 20, 0.6), 0 0 24px rgba(57, 255, 20, 0.2);
-  --glow-blue: 0 0 8px rgba(88, 166, 255, 0.5), 0 0 24px rgba(88, 166, 255, 0.15);
-  --glow-gold: 0 0 8px rgba(240, 192, 64, 0.6), 0 0 20px rgba(240, 192, 64, 0.2);
-  --gh-hover: rgba(88, 166, 255, 0.08);
+  --glow-neon: 0 0 8px rgba(57, 255, 20, 0.5), 0 0 30px rgba(57, 255, 20, 0.15);
+  --glow-blue: 0 0 8px rgba(88, 166, 255, 0.5), 0 0 30px rgba(88, 166, 255, 0.15);
+  --glow-gold: 0 0 8px rgba(240, 192, 64, 0.5), 0 0 25px rgba(240, 192, 64, 0.15);
+  --glow-cyan: 0 0 8px rgba(0, 240, 255, 0.5), 0 0 30px rgba(0, 240, 255, 0.15);
+  --glow-purple: 0 0 8px rgba(189, 147, 249, 0.5), 0 0 25px rgba(189, 147, 249, 0.15);
+  --gh-hover: rgba(88, 166, 255, 0.06);
+
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-spring: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* --- Reset & Base --- */
@@ -42,7 +56,7 @@
 }
 
 html {
-  font-size: 115%; /* Increased by an additional 10% total */
+  font-size: 115%;
   scroll-behavior: smooth;
 }
 
@@ -52,13 +66,37 @@ body {
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
-  /* subtle scanline effect */
+  /* Subtle animated scanline */
   background-image:
     repeating-linear-gradient(0deg,
       transparent,
       transparent 2px,
-      rgba(0, 0, 0, 0.03) 2px,
-      rgba(0, 0, 0, 0.03) 4px);
+      rgba(0, 0, 0, 0.04) 2px,
+      rgba(0, 0, 0, 0.04) 4px);
+  /* Deep background radial glow */
+  background-color: var(--bg);
+}
+
+/* Ambient background glow */
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: 
+    radial-gradient(ellipse at 20% 50%, rgba(57, 255, 20, 0.025) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(88, 166, 255, 0.02) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(189, 147, 249, 0.015) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+  animation: ambient-drift 30s ease-in-out infinite alternate;
+}
+
+@keyframes ambient-drift {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  100% { transform: translate(-2%, 1%) rotate(2deg); }
 }
 
 a {
@@ -81,48 +119,68 @@ a:hover {
 
 .neon-text {
   color: var(--neon);
-  text-shadow: var(--glow-neon);
+  text-shadow: 0 0 8px rgba(57, 255, 20, 0.5), 0 0 20px rgba(57, 255, 20, 0.15);
 }
 
 .blue-text {
   color: var(--blue);
-  text-shadow: var(--glow-blue);
+  text-shadow: 0 0 8px rgba(88, 166, 255, 0.4), 0 0 20px rgba(88, 166, 255, 0.1);
 }
 
 .gold-text {
   color: var(--gold);
-  text-shadow: var(--glow-gold);
+  text-shadow: 0 0 8px rgba(240, 192, 64, 0.5), 0 0 20px rgba(240, 192, 64, 0.15);
 }
 
 .dim-text {
   color: var(--text-dim);
 }
 
-/* --- Glass Cards --- */
+/* --- Glass Cards (Premium Glassmorphism) --- */
 .glass {
-  background: rgba(22, 27, 34, 0.8);
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  transition: border-color 0.3s, box-shadow 0.3s;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: border-color var(--transition-smooth), box-shadow var(--transition-smooth), transform var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle inner glow on glass cards */
+.glass::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(57, 255, 20, 0.15), transparent);
+  pointer-events: none;
+  z-index: 1;
 }
 
 .glass-hover:hover {
-  border-color: rgba(57, 255, 20, 0.5);
-  box-shadow: var(--glow-neon);
+  border-color: rgba(57, 255, 20, 0.4);
+  box-shadow: var(--glow-neon), inset 0 1px 0 rgba(57, 255, 20, 0.1);
+  transform: translateY(-2px);
 }
 
 .glass-blue {
   border-color: var(--border-blue);
 }
 
-.glass-blue:hover {
-  border-color: rgba(88, 166, 255, 0.6);
-  box-shadow: var(--glow-blue);
+.glass-blue::before {
+  background: linear-gradient(90deg, transparent, rgba(88, 166, 255, 0.15), transparent);
 }
 
-/* --- Buttons --- */
+.glass-blue:hover {
+  border-color: rgba(88, 166, 255, 0.5);
+  box-shadow: var(--glow-blue), inset 0 1px 0 rgba(88, 166, 255, 0.1);
+}
+
+/* --- Buttons (Premium) --- */
 .btn {
   font-family: var(--font-code);
   font-weight: 700;
@@ -135,34 +193,67 @@ a:hover {
   cursor: pointer;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  transition: all 0.2s;
+  transition: all var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animated shimmer on hover */
+.btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(57, 255, 20, 0.08), transparent);
+  transition: left 0.6s ease;
+  pointer-events: none;
+}
+
+.btn:hover:not(:disabled)::after {
+  left: 100%;
 }
 
 .btn:hover:not(:disabled) {
   background: var(--neon-dim);
   box-shadow: var(--glow-neon);
+  transform: translateY(-1px);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .btn:disabled {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
 .btn-primary {
-  background: var(--neon);
+  background: linear-gradient(135deg, var(--neon), var(--neon-bright));
   color: var(--bg);
   border-color: var(--neon);
+  font-weight: 800;
+}
+
+.btn-primary::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #4dff2a;
-  box-shadow: var(--glow-neon);
+  background: linear-gradient(135deg, var(--neon-bright), var(--neon));
+  box-shadow: var(--glow-neon), 0 4px 20px rgba(57, 255, 20, 0.25);
   color: var(--bg);
 }
 
 .btn-blue {
   border-color: var(--blue);
   color: var(--blue);
+}
+
+.btn-blue::after {
+  background: linear-gradient(90deg, transparent, rgba(88, 166, 255, 0.08), transparent);
 }
 
 .btn-blue:hover:not(:disabled) {
@@ -173,6 +264,10 @@ a:hover {
 .btn-gold {
   border-color: var(--gold);
   color: var(--gold);
+}
+
+.btn-gold::after {
+  background: linear-gradient(90deg, transparent, rgba(240, 192, 64, 0.08), transparent);
 }
 
 .btn-gold:hover:not(:disabled) {
@@ -189,65 +284,104 @@ a:hover {
   background: var(--red-dim);
 }
 
-/* --- XP Bar --- */
+/* --- XP Bar (Premium Animated Gradient) --- */
 .xp-bar-track {
   width: 100%;
-  height: 8px;
+  height: 10px;
   background: var(--bg-3);
-  border-radius: 4px;
+  border-radius: 5px;
   overflow: hidden;
   border: 1px solid var(--border);
+  position: relative;
 }
 
 .xp-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--neon), #9dff6e);
-  box-shadow: 0 0 8px var(--neon);
-  border-radius: 4px;
+  background: linear-gradient(90deg, #1b8a0a, var(--neon), #9dff6e, var(--neon));
+  background-size: 300% 100%;
+  box-shadow: 0 0 12px var(--neon), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
   transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: xp-shimmer 3s ease infinite;
+  position: relative;
 }
 
-/* --- Terminal --- */
+@keyframes xp-shimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* --- Terminal (CRT Glow Effect) --- */
 .terminal-window {
   background: #000;
   border: 1px solid #333;
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   font-family: var(--font-code);
   overflow: hidden;
+  position: relative;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+/* CRT scanline effect on terminal */
+.terminal-window::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 1px,
+    rgba(0, 0, 0, 0.08) 1px,
+    rgba(0, 0, 0, 0.08) 2px
+  );
+  pointer-events: none;
+  z-index: 2;
+  border-radius: var(--radius-lg);
 }
 
 .terminal-titlebar {
-  background: #1a1a1a;
-  padding: 0.4rem 1rem;
+  background: linear-gradient(180deg, #1e1e1e, #161616);
+  padding: 0.5rem 1rem;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.45rem;
   border-bottom: 1px solid #333;
   font-size: 0.7rem;
   color: var(--text-dim);
 }
 
 .terminal-titlebar .dot {
-  width: 10px;
-  height: 10px;
+  width: 11px;
+  height: 11px;
   border-radius: 50%;
+  transition: filter 0.2s;
+}
+
+.terminal-titlebar:hover .dot {
+  filter: brightness(1.3);
 }
 
 .dot-red {
   background: #ff5f57;
+  box-shadow: 0 0 4px rgba(255, 95, 87, 0.4);
 }
 
 .dot-yellow {
   background: #febc2e;
+  box-shadow: 0 0 4px rgba(254, 188, 46, 0.4);
 }
 
 .dot-green {
   background: #28c841;
+  box-shadow: 0 0 4px rgba(40, 200, 65, 0.4);
 }
 
 .terminal-body {
   padding: 1rem;
   min-height: 150px;
+  position: relative;
+  z-index: 1;
 }
 
 .terminal-line {
@@ -260,6 +394,7 @@ a:hover {
 .terminal-prompt {
   color: var(--neon);
   flex-shrink: 0;
+  text-shadow: 0 0 6px rgba(57, 255, 20, 0.3);
 }
 
 .terminal-input-line {
@@ -269,6 +404,8 @@ a:hover {
   padding: 0.5rem 0;
   border-top: 1px solid #222;
   margin-top: 0.5rem;
+  position: relative;
+  z-index: 1;
 }
 
 .terminal-input {
@@ -283,12 +420,13 @@ a:hover {
 }
 
 .terminal-cursor {
-  width: 8px;
-  height: 1em;
+  width: 9px;
+  height: 1.1em;
   background: var(--neon);
   animation: blink 1s step-end infinite;
   border-radius: 1px;
   display: inline-block;
+  box-shadow: 0 0 6px rgba(57, 255, 20, 0.5);
 }
 
 @keyframes blink {
@@ -303,21 +441,22 @@ a:hover {
   height: 16px;
   border-radius: 50%;
   background: var(--neon);
-  box-shadow: 0 0 6px var(--neon);
+  box-shadow: 0 0 8px var(--neon);
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .commit-dot:hover {
-  transform: scale(1.4);
+  transform: scale(1.5);
+  box-shadow: 0 0 16px var(--neon);
 }
 
 .commit-dot.head {
-  box-shadow: 0 0 12px var(--blue);
+  box-shadow: 0 0 16px var(--blue);
   background: var(--blue);
 }
 
-/* --- Badge --- */
+/* --- Badge (Premium Pill) --- */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -327,24 +466,28 @@ a:hover {
   font-size: 0.72rem;
   font-weight: 600;
   border: 1px solid;
+  transition: all var(--transition-smooth);
 }
 
 .badge-neon {
   border-color: var(--neon);
   color: var(--neon);
   background: var(--neon-dim);
+  box-shadow: 0 0 6px rgba(57, 255, 20, 0.15);
 }
 
 .badge-blue {
   border-color: var(--blue);
   color: var(--blue);
   background: var(--blue-dim);
+  box-shadow: 0 0 6px rgba(88, 166, 255, 0.15);
 }
 
 .badge-gold {
   border-color: var(--gold);
   color: var(--gold);
   background: var(--gold-dim);
+  box-shadow: 0 0 6px rgba(240, 192, 64, 0.15);
 }
 
 .badge-dim {
@@ -472,6 +615,10 @@ a:hover {
   margin-top: 1.5rem;
 }
 
+.mt-8 {
+  margin-top: 2rem;
+}
+
 .text-xs {
   font-size: 0.72rem;
 }
@@ -512,28 +659,28 @@ a:hover {
   font-weight: 700;
 }
 
-/* --- Scrollbar --- */
+/* --- Premium Scrollbar --- */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-2);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--bg-3);
+  background: rgba(57, 255, 20, 0.15);
   border-radius: 3px;
+  transition: background 0.2s;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--neon);
+  background: rgba(57, 255, 20, 0.4);
 }
 
 /* --- Animations --- */
 @keyframes float {
-
   0%,
   100% {
     transform: translateY(0);
@@ -555,7 +702,6 @@ a:hover {
 }
 
 @keyframes pulse-border {
-
   0%,
   100% {
     box-shadow: 0 0 4px var(--neon);
@@ -623,6 +769,26 @@ a:hover {
   }
 }
 
+@keyframes data-stream {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 -200px; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+@keyframes border-trace {
+  0% { background-position: 0% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes typewriter-blink {
+  0%, 100% { border-color: var(--neon); }
+  50% { border-color: transparent; }
+}
+
 .animate-float {
   animation: float 3s ease-in-out infinite;
 }
@@ -639,7 +805,38 @@ a:hover {
   animation: slide-in-left 0.4s ease forwards;
 }
 
+/* --- Mission Card Connection Lines --- */
+.mission-connector {
+  position: relative;
+}
+
+.mission-connector::after {
+  content: '';
+  position: absolute;
+  right: -1.5rem;
+  top: 50%;
+  width: 1.5rem;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(57, 255, 20, 0.3), transparent);
+}
+
+/* --- Stat Counter Animation --- */
+.stat-value {
+  transition: color var(--transition-smooth);
+}
+
+.stat-value:hover {
+  color: var(--neon) !important;
+  text-shadow: 0 0 8px rgba(57, 255, 20, 0.4);
+}
+
 /* --- Responsive --- */
+@media (max-width: 1024px) {
+  html {
+    font-size: 105%;
+  }
+}
+
 @media (max-width: 768px) {
 
   .grid-2,
@@ -649,5 +846,15 @@ a:hover {
 
   .hide-mobile {
     display: none;
+  }
+
+  body::before {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 95%;
   }
 }
