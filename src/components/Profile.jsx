@@ -87,7 +87,6 @@ export default function Profile({ player, dispatch }) {
 
                             <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '0.6rem', flexWrap: 'wrap' }}>
                                 <span className="badge badge-neon">LVL {current.level}</span>
-                                <span className="badge badge-gold">🔥 {player.streak} day streak</span>
                             </div>
                         </div>
 
@@ -216,7 +215,6 @@ export default function Profile({ player, dispatch }) {
                             ['Badges Earned', `${player.badges.length} / ${BADGES.length}`, 'var(--gold)'],
                             ['Commands Run', player.totalCommandsRun, 'var(--text)'],
                             ['Hints Used', player.hintsUsed, 'var(--red)'],
-                            ['Day Streak', `${player.streak} 🔥`, 'var(--red)'],
                         ].map(([label, val, color]) => (
                             <div key={label} style={{
                                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',

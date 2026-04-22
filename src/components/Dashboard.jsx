@@ -66,7 +66,6 @@ function ProfileCard({ player, levelInfo, dispatch }) {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '1.25rem' }}>
                 {[
                     { label: 'Total XP', value: player.xp.toLocaleString(), color: 'var(--gold)' },
-                    { label: 'Streak', value: `${player.streak}d 🔥`, color: 'var(--red)' },
                     { label: 'Missions', value: player.completedMissions.length, color: 'var(--neon)' },
                     { label: 'Badges', value: player.badges.length, color: 'var(--blue)' },
                 ].map(s => (
