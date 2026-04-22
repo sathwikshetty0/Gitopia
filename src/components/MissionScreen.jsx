@@ -276,7 +276,7 @@ function ChallengePhase({ mission, activeChallengeIndex, dispatch }) {
     };
 
     return (
-        <div>
+        <div style={{ position: 'relative' }}>
             {/* Progress header */}
             <div style={{
                 display: 'flex', alignItems: 'center', gap: '1rem',
@@ -305,31 +305,22 @@ function ChallengePhase({ mission, activeChallengeIndex, dispatch }) {
             <AnimatePresence>
                 {challengeResult && (
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
                         className="glass"
                         style={{
-                            position: 'absolute', inset: '60px 20px auto', zIndex: 100,
-                            padding: '1.5rem', textAlign: 'center', border: '1px solid var(--neon)',
-                            boxShadow: 'var(--glow-neon)', background: 'rgba(13,17,23,0.95)',
-                            backdropFilter: 'blur(10px)'
+                            position: 'absolute', top: '10px', right: '10px', zIndex: 100,
+                            padding: '0.75rem 1rem', textAlign: 'right', border: '1px solid var(--neon)',
+                            boxShadow: 'var(--glow-neon)', background: 'rgba(13,17,23,0.9)',
+                            backdropFilter: 'blur(8px)', borderRadius: '12px'
                         }}
                     >
-                        <div className="pixel neon-text" style={{ fontSize: '0.8rem', marginBottom: '1rem' }}>CHALLENGE COMPLETE</div>
-                        <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--neon)', marginBottom: '0.5rem' }}>
-                            {challengeResult.score.toFixed(1)} / {challengeResult.max.toFixed(0)}
+                        <div className="pixel neon-text" style={{ fontSize: '0.45rem', marginBottom: '0.2rem' }}>SUCCESS!</div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--neon)', lineHeight: 1 }}>
+                            {challengeResult.score.toFixed(1)} <span style={{ fontSize: '0.65rem', opacity: 0.6 }}>PTS</span>
                         </div>
-                        <div style={{ fontSize: '0.75rem', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem', color: 'var(--text-dim)', marginBottom: '1rem' }}>
-                            <div>⏱ Time: {Math.round(challengeResult.time)}s (-{challengeResult.timePenalty})</div>
-                            <div>❌ Errors: {challengeResult.errorPenalty / 5} (-{challengeResult.errorPenalty})</div>
-                            <div>💡 Hints: {challengeResult.hintPenalty / 10} (-{challengeResult.hintPenalty})</div>
-                        </div>
-                        <div style={{ height: '4px', background: '#333', borderRadius: '2px', overflow: 'hidden' }}>
-                             <motion.div 
-                                initial={{ width: 0 }}
-                                animate={{ width: `${(challengeResult.score / challengeResult.max) * 100}%` }}
-                                style={{ height: '100%', background: 'var(--neon)' }}
-                             />
+                        <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', marginTop: '0.4rem', letterSpacing: '0.02em' }}>
+                           PENALTY: -{challengeResult.errorPenalty + challengeResult.hintPenalty + challengeResult.timePenalty}
                         </div>
                     </motion.div>
                 )}
