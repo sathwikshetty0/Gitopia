@@ -143,9 +143,11 @@ export default function MissionScreen({
 // PHASE 1: BRIEFING
 // ═══════════════════════════════════════════════════
 function BriefingPhase({ mission, dispatch }) {
+    const concepts = mission.challenges.filter(c => c.context).map(c => c.context);
+    const totalLines = mission.briefing.lines.length + concepts.length;
     const [visibleLines, setVisibleLines] = useState(0);
     const [graphStep, setGraphStep] = useState(0);
-    const allLinesVisible = visibleLines >= mission.briefing.lines.length;
+    const allLinesVisible = visibleLines >= totalLines;
 
     useEffect(() => {
         if (!allLinesVisible) {
@@ -168,15 +170,35 @@ function BriefingPhase({ mission, dispatch }) {
 
                 {(mission.id === 'git_foundations' || mission.id === 'remotes') && <GitVsGithubPanel />}
 
-                {/* Animated bullet lines */}
+                {/* Animated bullet lines and concepts */}
                 <div style={{ marginBottom: '1.5rem' }}>
                     {mission.briefing.lines.map((line, i) => (
-                        <AnimatePresence key={i}>
+                        <AnimatePresence key={`line-${i}`}>
                             {i < visibleLines && (
                                 <BriefingLine text={line.replaceAll('→', ' ────────► ')} />
                             )}
                         </AnimatePresence>
                     ))}
+                    {concepts.map((concept, i) => {
+                        const index = mission.briefing.lines.length + i;
+                        return (
+                            <AnimatePresence key={`concept-${i}`}>
+                                {index < visibleLines && (
+                                    <motion.div
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        style={{
+                                            background: 'rgba(57,255,20,0.08)', border: '1px solid rgba(57,255,20,0.2)',
+                                            padding: '0.75rem 1rem', borderRadius: '8px', marginTop: '0.75rem',
+                                            fontSize: '0.8rem', lineHeight: 1.5, color: 'var(--text)',
+                                        }}
+                                    >
+                                        💡 <strong style={{ color: 'var(--neon)' }}>CONCEPT:</strong> {concept}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        );
+                    })}
                 </div>
 
                 {/* ASCII Diagram terminal */}
@@ -391,15 +413,7 @@ function TerminalChallenge({ challenge, onComplete }) {
             <div className="pixel" style={{ color: 'var(--blue)', fontSize: '0.52rem', marginBottom: '1rem' }}>
                 ⌨ TERMINAL CHALLENGE
             </div>
-            {challenge.context && (
-                <div style={{
-                    background: 'rgba(57,255,20,0.08)', border: '1px solid rgba(57,255,20,0.2)',
-                    padding: '1rem', borderRadius: '8px', marginBottom: '1.25rem',
-                    fontSize: '0.85rem', lineHeight: 1.6, color: 'var(--text)',
-                }}>
-                    💡 <strong style={{ color: 'var(--neon)' }}>CONCEPT:</strong> {challenge.context}
-                </div>
-            )}
+
             <p style={{ marginBottom: '1.25rem', fontSize: '0.85rem', lineHeight: 1.65, color: 'var(--text)' }}>
                 {challenge.instruction}
             </p>
@@ -482,17 +496,7 @@ function MCQChallenge({ challenge, onComplete }) {
             <div className="pixel" style={{ color: 'var(--blue)', fontSize: '0.52rem', marginBottom: '1rem' }}>
                 {isCommand ? '💻 COMMAND CHALLENGE' : '📜 THEORY CHALLENGE'}
             </div>
-            
-            {challenge.context && (
-                <div style={{
-                    background: 'rgba(57,255,20,0.08)', border: '1px solid rgba(57,255,20,0.2)',
-                    padding: '1rem', borderRadius: '8px', marginBottom: '1.25rem',
-                    fontSize: '0.85rem', lineHeight: 1.6, color: 'var(--text)',
-                    userSelect: 'none'
-                }}>
-                    💡 <strong style={{ color: 'var(--neon)' }}>CONCEPT:</strong> {challenge.context}
-                </div>
-            )}
+
 
             {challenge.situation && (
                 <div style={{
@@ -650,15 +654,7 @@ function OrderChallenge({ challenge, onComplete }) {
             <div className="pixel" style={{ color: 'var(--purple)', fontSize: '0.52rem', marginBottom: '1rem' }}>
                 🔢 SEQUENCE CHALLENGE
             </div>
-            {challenge.context && (
-                <div style={{
-                    background: 'rgba(57,255,20,0.08)', border: '1px solid rgba(57,255,20,0.2)',
-                    padding: '1rem', borderRadius: '8px', marginBottom: '1.25rem',
-                    fontSize: '0.85rem', lineHeight: 1.6, color: 'var(--text)',
-                }}>
-                    💡 <strong style={{ color: 'var(--neon)' }}>CONCEPT:</strong> {challenge.context}
-                </div>
-            )}
+
             <p style={{ marginBottom: '1.25rem', fontSize: '0.88rem', lineHeight: 1.65 }}>{challenge.question}</p>
 
             {/* Available items */}
@@ -772,15 +768,7 @@ function FixCommandChallenge({ challenge, onComplete }) {
             <div className="pixel" style={{ color: 'var(--red)', fontSize: '0.52rem', marginBottom: '1rem' }}>
                 🔧 FIX THE COMMAND
             </div>
-            {challenge.context && (
-                <div style={{
-                    background: 'rgba(57,255,20,0.08)', border: '1px solid rgba(57,255,20,0.2)',
-                    padding: '1rem', borderRadius: '8px', marginBottom: '1.25rem',
-                    fontSize: '0.85rem', lineHeight: 1.6, color: 'var(--text)',
-                }}>
-                    💡 <strong style={{ color: 'var(--neon)' }}>CONCEPT:</strong> {challenge.context}
-                </div>
-            )}
+
             <p style={{ marginBottom: '1.25rem', fontSize: '0.88rem', lineHeight: 1.65 }}>{challenge.question}</p>
 
             <div className="terminal-window" style={{ marginBottom: '1rem' }}>
@@ -868,15 +856,6 @@ function ConflictChallenge({ challenge, onComplete }) {
             <div className="pixel" style={{ color: 'var(--red)', fontSize: '0.52rem', marginBottom: '1rem' }}>
                 ⚔️ CONFLICT RESOLUTION
             </div>
-            {challenge.context && (
-                <div style={{
-                    background: 'rgba(57,255,20,0.08)', border: '1px solid rgba(57,255,20,0.2)',
-                    padding: '1rem', borderRadius: '8px', marginBottom: '1.25rem',
-                    fontSize: '0.85rem', lineHeight: 1.6, color: 'var(--text)',
-                }}>
-                    💡 <strong style={{ color: 'var(--neon)' }}>CONCEPT:</strong> {challenge.context}
-                </div>
-            )}
             <p style={{ marginBottom: '0.5rem', fontSize: '0.88rem', lineHeight: 1.65 }}>{challenge.description}</p>
             <p className="dim-text text-xs" style={{ marginBottom: '1.25rem' }}>
                 Delete the conflict markers ({"<<<"}, {"==="}, {">>>"}). Keep only the version of code you want.
