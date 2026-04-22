@@ -31,6 +31,28 @@ const calculatePoints = (baseXP, errors, hints, timeSeconds) => {
     };
 };
 
+// Confetti particle for reward screen
+function ConfettiParticle({ delay, color }) {
+    const x = Math.random() * 100;
+    const duration = 2 + Math.random() * 2;
+    const size = 4 + Math.random() * 6;
+    return (
+        <motion.div
+            initial={{ opacity: 1, y: -20, x: `${x}%`, rotate: 0, scale: 1 }}
+            animate={{ opacity: 0, y: 400, rotate: 360 + Math.random() * 360, scale: 0.3 }}
+            transition={{ duration, delay, ease: 'easeOut' }}
+            style={{
+                position: 'absolute', top: 0,
+                width: size, height: size,
+                background: color,
+                borderRadius: Math.random() > 0.5 ? '50%' : '2px',
+                pointerEvents: 'none', zIndex: 10,
+                boxShadow: `0 0 4px ${color}`,
+            }}
+        />
+    );
+}
+
 export default function MissionScreen({ 
     activeMissionId, missionPhase, activeChallengeIndex, 
     currentMissionXP, lastXPGain, earnedBadge, dispatch 
@@ -44,9 +66,16 @@ export default function MissionScreen({
             <div style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 marginBottom: '1.25rem', padding: '0.75rem 1rem',
-                background: 'rgba(22,27,34,0.7)', border: '1px solid rgba(57,255,20,0.15)',
-                borderRadius: '8px',
+                background: 'rgba(16,22,32,0.85)', border: '1px solid rgba(57,255,20,0.12)',
+                borderRadius: '12px', position: 'relative', overflow: 'hidden',
+                backdropFilter: 'blur(12px)',
             }}>
+                {/* Top gradient accent */}
+                <div style={{
+                    position: 'absolute', top: 0, left: 0, right: 0, height: '2px',
+                    background: 'linear-gradient(90deg, transparent, var(--neon), var(--blue), transparent)',
+                    opacity: 0.5,
+                }} />
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <span style={{ fontSize: '1.5rem' }}>{mission.icon}</span>
                     <div>
@@ -55,17 +84,17 @@ export default function MissionScreen({
                     </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <span style={{ color: 'var(--gold)', fontSize: '0.75rem', fontWeight: 700 }}>
+                    <span style={{ color: 'var(--gold)', fontSize: '0.75rem', fontWeight: 700, textShadow: '0 0 8px rgba(240,192,64,0.3)' }}>
                         +{mission.rewardXP} XP
                     </span>
                     {/* Phase dots */}
-                    <div style={{ display: 'flex', gap: '4px' }}>
+                    <div style={{ display: 'flex', gap: '5px' }}>
                         {['briefing', 'challenge', 'reward'].map((ph, i) => (
-                            <div key={ph} style={{
+                            <motion.div key={ph} animate={missionPhase === ph ? { scale: [1, 1.3, 1] } : {}} transition={{ duration: 1.5, repeat: Infinity }} style={{
                                 width: 8, height: 8, borderRadius: '50%',
                                 background: missionPhase === ph ? 'var(--neon)'
                                     : ['briefing', 'challenge', 'reward'].indexOf(missionPhase) > i ? 'var(--blue)'
-                                        : '#333',
+                                        : 'rgba(255,255,255,0.1)',
                                 boxShadow: missionPhase === ph ? 'var(--glow-neon)' : 'none',
                                 transition: 'all 0.3s',
                             }} />
@@ -993,41 +1022,75 @@ function HintRow({ hints, hintsShown, setHintsShown, wrongCount = 0 }) {
 }
 
 // ═══════════════════════════════════════════════════
-// PHASE 3: REWARD
+// PHASE 3: REWARD (with confetti)
 // ═══════════════════════════════════════════════════
 function RewardPhase({ mission, totalXP, actualGainedXP, earnedBadge, dispatch }) {
     const badge = BADGES.find(b => b.id === earnedBadge);
     const [animatedXP, setAnimatedXP] = useState(0);
-    const isPerfect = totalXP >= 95; // Use 95 as perfect run threshold for 100 pt standard
+    const isPerfect = totalXP >= 95;
+
+    const confettiColors = ['#39ff14', '#58a6ff', '#f0c040', '#bd93f9', '#ff4d4d', '#00f0ff'];
+    const confettiParticles = Array.from({ length: 30 }, (_, i) => ({
+        id: i, delay: Math.random() * 0.8,
+        color: confettiColors[i % confettiColors.length],
+    }));
 
     useEffect(() => {
         if (totalXP === 0) return;
         let current = 0;
-        const step = totalXP / 50;
+        const step = totalXP / 60;
         const interval = setInterval(() => {
             current = Math.min(current + step, totalXP);
             setAnimatedXP(Math.round(current));
             if (current >= totalXP) clearInterval(interval);
-        }, 20);
+        }, 16);
         return () => clearInterval(interval);
     }, [totalXP]);
 
     return (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '1rem 0 2rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '1rem 0 2rem', position: 'relative', overflow: 'hidden', minHeight: '450px' }}>
+            {/* Confetti */}
+            {confettiParticles.map(p => (
+                <ConfettiParticle key={p.id} delay={p.delay} color={p.color} />
+            ))}
+
             <motion.div
                 className="glass"
                 style={{
-                    maxWidth: '480px', width: '100%', textAlign: 'center',
-                    padding: '2.5rem 2rem',
+                    maxWidth: '520px', width: '100%', textAlign: 'center',
+                    padding: '2.5rem 2rem', position: 'relative',
                     border: '2px solid var(--gold)',
-                    boxShadow: 'var(--glow-gold)',
+                    boxShadow: '0 0 40px rgba(240,192,64,0.15), 0 0 80px rgba(240,192,64,0.05)',
+                    overflow: 'hidden',
                 }}
                 initial={{ scale: 0.85, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
             >
+                {/* Radial glow behind */}
+                <div style={{
+                    position: 'absolute', top: '50%', left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '300px', height: '300px',
+                    background: 'radial-gradient(circle, rgba(240,192,64,0.08) 0%, transparent 70%)',
+                    pointerEvents: 'none',
+                }} />
+
+                {/* Animated ring */}
+                <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+                    style={{
+                        position: 'absolute', top: '50%', left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: '250px', height: '250px',
+                        border: '1px dashed rgba(240,192,64,0.12)',
+                        borderRadius: '50%', pointerEvents: 'none',
+                    }}
+                />
+
                 <motion.div
                     className="pixel gold-text"
-                    style={{ fontSize: '0.9rem', letterSpacing: '0.1em', marginBottom: '1.25rem' }}
+                    style={{ fontSize: '0.85rem', letterSpacing: '0.12em', marginBottom: '1.25rem', position: 'relative' }}
                     initial={{ opacity: 0, y: -8 }}
                     animate={{ opacity: 1, y: 0, transition: { delay: 0.2 } }}
                 >
@@ -1035,7 +1098,7 @@ function RewardPhase({ mission, totalXP, actualGainedXP, earnedBadge, dispatch }
                 </motion.div>
 
                 <motion.div
-                    style={{ fontSize: '4rem', marginBottom: '0.75rem' }}
+                    style={{ fontSize: '4rem', marginBottom: '0.75rem', position: 'relative' }}
                     initial={{ scale: 0, rotate: -20 }}
                     animate={{ scale: 1, rotate: 0, transition: { type: 'spring', stiffness: 200, delay: 0.25 } }}
                 >
@@ -1043,24 +1106,37 @@ function RewardPhase({ mission, totalXP, actualGainedXP, earnedBadge, dispatch }
                 </motion.div>
 
                 <motion.div
-                    style={{ fontSize: '3rem', fontWeight: 700, color: 'var(--gold)', lineHeight: 1, marginBottom: '0.5rem' }}
+                    style={{
+                        fontSize: '2.8rem', fontWeight: 800, color: 'var(--gold)', lineHeight: 1,
+                        marginBottom: '0.5rem', position: 'relative',
+                        textShadow: '0 0 20px rgba(240,192,64,0.4)',
+                        fontVariantNumeric: 'tabular-nums',
+                    }}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1, transition: { delay: 0.4 } }}
                 >
-                    {animatedXP.toFixed(1)} POINTS
+                    {animatedXP.toFixed(1)} <span style={{ fontSize: '1.2rem', opacity: 0.7 }}>POINTS</span>
                 </motion.div>
 
-                <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)', marginBottom: '1.5rem' }}>
+                <motion.div
+                    style={{ fontSize: '0.78rem', color: 'var(--text-dim)', marginBottom: '1.5rem', position: 'relative' }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1, transition: { delay: 0.5 } }}
+                >
                     {actualGainedXP === 0 && (
                         <span style={{ color: 'var(--blue)' }}>🛰️ REPLAY: You already earned rewards for this mission!</span>
                     )}
                     {actualGainedXP > 0 && isPerfect && (
-                        <span style={{ color: 'var(--neon)' }}>⚡ PERFECT RUN — Elite status confirmed!</span>
+                        <motion.span
+                            style={{ color: 'var(--neon)' }}
+                            animate={{ textShadow: ['0 0 8px rgba(57,255,20,0.3)', '0 0 16px rgba(57,255,20,0.6)', '0 0 8px rgba(57,255,20,0.3)'] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                        >⚡ PERFECT RUN — Elite status confirmed!</motion.span>
                     )}
                     {actualGainedXP > 0 && !isPerfect && (
                         `Final Score: ${totalXP.toFixed(1)} / 100`
                     )}
-                </div>
+                </motion.div>
 
                 {badge && (
                     <motion.div
@@ -1068,25 +1144,30 @@ function RewardPhase({ mission, totalXP, actualGainedXP, earnedBadge, dispatch }
                         animate={{ scale: 1, rotate: 0, transition: { type: 'spring', delay: 0.65 } }}
                         style={{
                             display: 'inline-block', padding: '1rem 1.5rem', marginBottom: '1.75rem',
-                            background: 'rgba(240,192,64,0.12)', border: '2px solid var(--gold)',
-                            borderRadius: '12px', boxShadow: 'var(--glow-gold)',
+                            background: 'rgba(240,192,64,0.08)', border: '2px solid var(--gold)',
+                            borderRadius: '14px', boxShadow: '0 0 30px rgba(240,192,64,0.2)',
+                            position: 'relative',
                         }}
                     >
                         <div style={{ fontSize: '2.5rem', marginBottom: '0.3rem' }}>{badge.icon}</div>
                         <div className="pixel gold-text" style={{ fontSize: '0.48rem', letterSpacing: '0.05em' }}>
                             {badge.name}
                         </div>
-                        <div style={{ fontSize: '0.62rem', color: 'var(--text-dim)', marginTop: '3px' }}>
-                            BADGE UNLOCKED!
-                        </div>
+                        <motion.div
+                            style={{ fontSize: '0.6rem', color: 'var(--neon)', marginTop: '4px', fontWeight: 700 }}
+                            animate={{ opacity: [0.5, 1, 0.5] }}
+                            transition={{ duration: 1.5, repeat: Infinity }}
+                        >
+                            ✓ BADGE UNLOCKED
+                        </motion.div>
                     </motion.div>
                 )}
 
-                <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+                <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', position: 'relative' }}>
                     <motion.button
                         className="btn btn-primary"
-                        style={{ padding: '0.85rem 2rem', fontSize: '0.85rem' }}
-                        whileHover={{ scale: 1.04 }}
+                        style={{ padding: '0.85rem 2.5rem', fontSize: '0.85rem' }}
+                        whileHover={{ scale: 1.04, boxShadow: '0 0 25px rgba(57,255,20,0.3)' }}
                         whileTap={{ scale: 0.97 }}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0, transition: { delay: 0.8 } }}
