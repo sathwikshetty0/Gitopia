@@ -74,12 +74,19 @@ export function gameReducer(state, action) {
                 ? state.player.completedMissions
                 : [...state.player.completedMissions, module.id];
 
-            const isNewBadge = module.badgeId && !state.player.badges.includes(module.badgeId);
-            const newBadges = isNewBadge
-                ? [...state.player.badges, module.badgeId]
-                : state.player.badges;
+            let newBadges = [...state.player.badges];
+            let earnedBadge = null;
 
-            const earnedBadge = isNewBadge ? module.badgeId : null;
+            if (module.badgeId && !newBadges.includes(module.badgeId)) {
+                newBadges.push(module.badgeId);
+                earnedBadge = module.badgeId;
+            }
+
+            // Award ultimate 'git_god' badge if all modules are completed
+            if (newCompleted.length >= 10 && !newBadges.includes('git_god')) {
+                newBadges.push('git_god');
+                if (!earnedBadge) earnedBadge = 'git_god';
+            }
 
             return {
                 ...state,
@@ -121,6 +128,51 @@ export function gameReducer(state, action) {
                     ...action.payload
                 }
             };
+
+        case 'ADMIN_UNLOCK_ALL': {
+            const allMissionIds = [
+                'git_foundations', 'staging_commits', 'branching', 'merging',
+                'remotes', 'pull_requests', 'conflicts', 'rebasing',
+                'collaboration', 'open_source'
+            ];
+            const allBadgeIds = [
+                'first_commit', 'staged', 'branch_master', 'merge_warrior',
+                'remote_hero', 'code_reviewer', 'conflict_slayer', 'rebase_ninja',
+                'collab_pro', 'oss_hero', 'git_god'
+            ];
+
+            return {
+                ...state,
+                view: 'dashboard',
+                activeMissionId: null,
+                missionPhase: 'briefing',
+                player: {
+                    ...state.player,
+                    xp: 2450,
+                    streak: Math.max(state.player.streak, 7),
+                    completedMissions: allMissionIds,
+                    badges: allBadgeIds,
+                    totalCommandsRun: Math.max(state.player.totalCommandsRun, 88),
+                    adminMode: true,
+                },
+            };
+        }
+
+        case 'ADMIN_RESET_PROGRESS': {
+            return {
+                ...state,
+                view: 'dashboard',
+                activeMissionId: null,
+                missionPhase: 'briefing',
+                player: {
+                    ...initialState.player,
+                    username: state.player.username || 'Hacker',
+                    email: state.player.email || '',
+                    gitProfile: state.player.gitProfile || '',
+                    adminMode: false,
+                },
+            };
+        }
 
         default:
             return state;

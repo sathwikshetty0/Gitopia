@@ -90,7 +90,7 @@ export default function Navbar({ view, player, dispatch }) {
             </motion.div>
 
             {/* Navigation Links */}
-            <div style={{ display: 'flex', gap: '0.35rem', background: 'rgba(255,255,255,0.03)', borderRadius: '10px', padding: '3px' }}>
+            <div style={{ display: 'flex', gap: '0.35rem', background: 'rgba(255,255,255,0.03)', borderRadius: '10px', padding: '3px', alignItems: 'center' }}>
                 {NAV_ITEMS.map(item => {
                     const isActive = view === item.view;
                     return (
@@ -134,6 +134,29 @@ export default function Navbar({ view, player, dispatch }) {
                         </motion.button>
                     );
                 })}
+                {(player.completedMissions?.length >= 10 || player.adminMode) && (
+                    <motion.button
+                        onClick={() => dispatch({ type: 'SET_VIEW', payload: 'certification' })}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.97 }}
+                        style={{
+                            background: view === 'certification' ? 'rgba(240,192,64,0.2)' : 'rgba(240,192,64,0.08)',
+                            border: `2px solid ${view === 'certification' ? 'var(--gold)' : 'rgba(240,192,64,0.4)'}`,
+                            borderRadius: '8px',
+                            padding: '0.5rem 1rem',
+                            color: 'var(--gold)',
+                            fontFamily: 'var(--font-code)',
+                            fontSize: '0.88rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            display: 'flex', alignItems: 'center', gap: '0.45rem',
+                        }}
+                    >
+                        <span style={{ fontSize: '1rem' }}>🎓</span>
+                        <span className="hide-mobile">CERTIFICATE</span>
+                    </motion.button>
+                )}
             </div>
 
             {/* Player info */}

@@ -451,8 +451,6 @@ function MCQChallenge({ challenge, onComplete }) {
     const [hintsShown, setHintsShown] = useState(0);
     const [wrongCount, setWrongCount] = useState(0);
 
-    const isCommand = !challenge.forceMCQ && challenge.options[challenge.correct].trim().toLowerCase().startsWith('git');
-
     const handleSubmit = (clickedIndex = null) => {
         const val = clickedIndex !== null ? clickedIndex : selected;
         if (val === null || result) return;
@@ -461,17 +459,11 @@ function MCQChallenge({ challenge, onComplete }) {
         const correctOptionLetter = String.fromCharCode(65 + challenge.correct);
 
         let isCorrect = false;
-        if (isCommand) {
-            // Fuzzy match for commands: ignore arrows/separators but keep command syntax
-            isCorrect = normalizeForMatch(val) === normalizeForMatch(correctOptionText);
-        } else {
-            // Clicking or typing for theory
-            if (typeof val === 'number') {
-                isCorrect = val === challenge.correct;
-            } else {
-                isCorrect = (val.trim().toLowerCase() === correctOptionLetter.trim().toLowerCase()) ||
-                            (normalizeForMatch(val) === normalizeForMatch(correctOptionText));
-            }
+        if (typeof val === 'number') {
+            isCorrect = val === challenge.correct;
+        } else if (typeof val === 'string') {
+            isCorrect = (val.trim().toLowerCase() === correctOptionLetter.trim().toLowerCase()) ||
+                        (normalizeForMatch(val) === normalizeForMatch(correctOptionText));
         }
         
         setResult(isCorrect ? 'correct' : 'wrong');
@@ -486,7 +478,7 @@ function MCQChallenge({ challenge, onComplete }) {
             });
             setTimeout(() => {
                 setResult(null);
-                setSelected(isCommand ? '' : null);
+                setSelected(null);
             }, 1600);
         }
     };
@@ -494,7 +486,7 @@ function MCQChallenge({ challenge, onComplete }) {
     return (
         <div className="glass p-6">
             <div className="pixel" style={{ color: 'var(--blue)', fontSize: '0.52rem', marginBottom: '1rem' }}>
-                {isCommand ? '💻 COMMAND CHALLENGE' : '📜 THEORY CHALLENGE'}
+                {challenge.type === 'scenario' ? '📡 SCENARIO CHALLENGE' : '📜 MULTIPLE CHOICE CHALLENGE'}
             </div>
 
 
@@ -503,35 +495,34 @@ function MCQChallenge({ challenge, onComplete }) {
                     background: 'rgba(88,166,255,0.08)', border: '1px solid rgba(88,166,255,0.2)',
                     padding: '1rem', borderRadius: '8px', marginBottom: '1.25rem',
                     fontSize: '0.85rem', lineHeight: 1.6, color: 'var(--text)',
-                    userSelect: 'none'
                 }}>
                     📡 <strong style={{ color: 'var(--blue)' }}>SITUATION:</strong> {challenge.situation}
                 </div>
             )}
 
-            <p style={{ marginBottom: '1.25rem', fontSize: '0.88rem', lineHeight: 1.65, color: 'var(--text)', userSelect: 'none' }}>
+            <p style={{ marginBottom: '1.25rem', fontSize: '0.88rem', lineHeight: 1.65, color: 'var(--text)' }}>
                 {challenge.question}
             </p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.5rem', userSelect: isCommand ? 'none' : 'auto' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.5rem' }}>
                 <div className="dim-text text-xs" style={{ marginBottom: '0.2rem', opacity: 0.6, letterSpacing: '0.05em' }}>
-                    {isCommand ? 'AVAILABLE OPTIONS (CANNOT BE COPIED)' : 'CHOOSE THE CORRECT OPTION:'}
+                    CHOOSE THE CORRECT OPTION:
                 </div>
                 {challenge.options.map((opt, i) => {
-                    // Logic for display colors
                     let bg = 'rgba(255,255,255,0.03)', border = '#3d444d', color = 'var(--text)';
                     
                     if (result === 'correct' && i === challenge.correct) { bg = 'rgba(57,255,20,0.12)'; border = 'var(--neon)'; color = 'var(--neon)'; }
-                    if (result === 'wrong' && !isCommand && i === selected && i !== challenge.correct) { bg = 'rgba(255,77,77,0.12)'; border = 'var(--red)'; color = 'var(--red)'; }
-                    if (!result && !isCommand && i === selected) { bg = 'rgba(88,166,255,0.10)'; border = 'var(--blue)'; color = 'var(--blue)'; }
+                    if (result === 'wrong' && i === challenge.correct) { bg = 'rgba(57,255,20,0.08)'; border = 'var(--neon)'; color = 'var(--neon)'; }
+                    if (result === 'wrong' && i === selected && i !== challenge.correct) { bg = 'rgba(255,77,77,0.12)'; border = 'var(--red)'; color = 'var(--red)'; }
+                    if (!result && i === selected) { bg = 'rgba(88,166,255,0.10)'; border = 'var(--blue)'; color = 'var(--blue)'; }
 
                     return (
                         <motion.button
                             key={i}
-                            disabled={!!result || isCommand}
-                            whileHover={(!result && !isCommand) ? { x: 4 } : {}}
+                            disabled={!!result}
+                            whileHover={!result ? { x: 4 } : {}}
                             onClick={() => {
-                                if (!isCommand && !result) {
+                                if (!result) {
                                     setSelected(i);
                                 }
                             }}
@@ -539,9 +530,8 @@ function MCQChallenge({ challenge, onComplete }) {
                                 textAlign: 'left', padding: '0.8rem 1rem', borderRadius: '6px',
                                 background: bg, border: `1.5px solid ${border}`, color,
                                 fontFamily: 'var(--font-code)', fontSize: '0.82rem',
-                                cursor: (isCommand || result) ? 'default' : 'pointer',
+                                cursor: result ? 'default' : 'pointer',
                                 transition: 'all 0.2s ease',
-                                userSelect: isCommand ? 'none' : 'auto'
                             }}
                         >
                             <span style={{ marginRight: '0.6rem', opacity: 0.6, color: 'var(--blue)' }}>{String.fromCharCode(65 + i)}.</span>
@@ -550,41 +540,6 @@ function MCQChallenge({ challenge, onComplete }) {
                     );
                 })}
             </div>
-
-            {isCommand && (
-                <div className="terminal-window" style={{ marginBottom: '1.5rem', border: result === 'wrong' ? '1px solid var(--red)' : '1px solid var(--blue)' }}>
-                    <div className="terminal-titlebar">
-                        <div className="dot dot-red" /><div className="dot dot-yellow" /><div className="dot dot-green" />
-                        <span style={{ marginLeft: '0.5rem', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                            Command Entry Terminal
-                        </span>
-                    </div>
-                    <div style={{ padding: '0.8rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <span style={{ color: 'var(--blue)', fontWeight: 'bold' }}>EXEC:</span>
-                        <input
-                            type="text"
-                            placeholder="Full git command required..."
-                            value={selected !== null ? selected : ''}
-                            onChange={e => !result && setSelected(e.target.value)}
-                            onKeyDown={e => !result && e.key === 'Enter' && handleSubmit()}
-                            onPaste={e => {
-                                e.preventDefault();
-                                alert("⚠️ SECURITY TRIGGERED: No cheating! You must type the answer manually to learn.");
-                            }}
-                            onContextMenu={e => e.preventDefault()}
-                            style={{
-                                background: 'transparent', border: 'none', outline: 'none', flex: 1,
-                                color: result === 'correct' ? 'var(--neon)' : result === 'wrong' ? 'var(--red)' : '#fff',
-                                fontFamily: 'var(--font-code)', fontSize: '0.9rem',
-                            }}
-                            autoComplete="off"
-                            autoCorrect="off"
-                            spellCheck="false"
-                            disabled={!!result}
-                        />
-                    </div>
-                </div>
-            )}
 
             {wrongCount > 0 && (
                 <div className="dim-text text-xs" style={{ marginBottom: '0.5rem', color: 'var(--red)', textAlign: 'center' }}>
@@ -604,12 +559,12 @@ function MCQChallenge({ challenge, onComplete }) {
                     borderColor: 'transparent',
                     color: '#000',
                     fontWeight: 800,
-                    opacity: (selected === null && isCommand) || result ? 0.6 : 1
+                    opacity: selected === null || result ? 0.6 : 1
                 }}
-                disabled={(selected === null && !isCommand) || (selected === '' && isCommand) || !!result}
+                disabled={selected === null || !!result}
                 onClick={() => handleSubmit()}
             >
-                {result === 'correct' ? 'MISSION ACCOMPLISHED' : result === 'wrong' ? '✗ WRONG — TRY AGAIN' : (isCommand ? 'EXECUTE COMMAND' : 'SUBMIT ANSWER')}
+                {result === 'correct' ? 'MISSION ACCOMPLISHED' : result === 'wrong' ? '✗ WRONG — TRY AGAIN' : 'SUBMIT ANSWER'}
             </button>
         </div>
     );
@@ -785,11 +740,6 @@ function FixCommandChallenge({ challenge, onComplete }) {
                         value={answer}
                         onChange={e => setAnswer(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && handleCheck()}
-                        onPaste={e => {
-                            e.preventDefault();
-                            alert("⚠️ SECURITY TRIGGERED: No cheating! You must type the fix manually.");
-                        }}
-                        onContextMenu={e => e.preventDefault()}
                         style={{
                             background: 'transparent', border: 'none', outline: 'none', flex: 1,
                             color: feedback === 'correct' ? 'var(--neon)' : feedback === 'wrong' ? 'var(--red)' : 'var(--text)',
@@ -820,34 +770,76 @@ function FixCommandChallenge({ challenge, onComplete }) {
 function ConflictChallenge({ challenge, onComplete }) {
     const [resolved, setResolved] = useState(challenge.conflictText);
     const [feedback, setFeedback] = useState(null);
+    const [statusMsg, setStatusMsg] = useState('');
     const [hintsShown, setHintsShown] = useState(0);
     const [wrongCount, setWrongCount] = useState(0);
 
+    const normalize = (code) => {
+        return (code || '')
+            .replace(/\/\/.*/g, '')            // strip comments
+            .replace(/;+\s*$/g, '')            // strip trailing semicolons
+            .replace(/['"`]/g, '"')            // unify quotes
+            .replace(/\(\s+/g, '(')            // normalize ( spacing
+            .replace(/\s+\)/g, ')')            // normalize ) spacing
+            .replace(/\s+/g, ' ')              // collapse spaces
+            .trim();
+    };
+
     const handleResolve = () => {
         if (feedback === 'correct') return;
-        const hasMarkers = resolved.includes('<<<<') || resolved.includes('====') || resolved.includes('>>>>');
+
+        // 1. Check for leftover conflict markers (e.g. <<<, ===, >>>)
+        const hasMarkers = /<{3,}|={3,}|>{3,}/.test(resolved);
         if (hasMarkers) {
             setFeedback('markers-remain');
-            setTimeout(() => setFeedback(null), 2500);
+            setStatusMsg('⚠ Conflict markers (<<<<<<< HEAD, =======, >>>>>>>) are still present. Delete them completely!');
+            setTimeout(() => setFeedback(null), 3000);
             return;
         }
-        const correct = resolved.trim() === challenge.correct.trim();
-        setFeedback(correct ? 'correct' : 'wrong');
-        if (correct) {
+        // 2. Check if main branch version was kept instead of loginpage
+        const textWithoutMarkers = resolved.trim();
+        if (textWithoutMarkers.includes('Hello from main') && !textWithoutMarkers.includes('Hello from loginpage')) {
+            setFeedback('wrong');
+            setStatusMsg('⚠ You kept the "main" branch line. Keep the "loginpage" version: console.log("Hello from loginpage")');
+            setWrongCount(c => c + 1);
+            setTimeout(() => setFeedback(null), 3500);
+            return;
+        }
+
+        // 3. Check if both versions were kept
+        if (textWithoutMarkers.includes('Hello from main') && textWithoutMarkers.includes('Hello from loginpage')) {
+            setFeedback('wrong');
+            setStatusMsg('⚠ Both versions are present. Delete the "main" line and keep only: console.log("Hello from loginpage")');
+            setWrongCount(c => c + 1);
+            setTimeout(() => setFeedback(null), 3500);
+            return;
+        }
+
+        // 4. Flexible match on incoming branch version
+        const normInput = normalize(resolved);
+        const normExpected = normalize(challenge.correct);
+        const isExactMatch = normInput === normExpected;
+        const isContentMatch = normInput === '"Hello from loginpage"' || normInput === 'Hello from loginpage';
+
+        if (isExactMatch || isContentMatch) {
+            setFeedback('correct');
+            setStatusMsg('✓ CONFLICT RESOLVED! Advancing to next step...');
             onComplete(challenge.xp, { errors: wrongCount, hints: hintsShown });
         } else {
+            setFeedback('wrong');
+            setStatusMsg('✗ Not quite right. Target code: console.log("Hello from loginpage")');
             setWrongCount(c => {
                 const newC = c + 1;
                 if (newC === 3 && hintsShown === 0) setHintsShown(1);
                 return newC;
             });
-            setTimeout(() => setFeedback(null), 2000);
+            setTimeout(() => setFeedback(null), 3000);
         }
     };
 
-    const feedbackMsg = {
+    const feedbackMsg = statusMsg || {
         'markers-remain': '⚠ Conflict markers (<<<, ===, >>>) are still present. Remove them!',
-        'wrong': '✗ That\'s not the feature branch version. Try again!',
+        'wrong': '✗ That\'s not the incoming branch version. Try again!',
         'correct': '✓ CONFLICT RESOLVED! Perfect.',
     }[feedback] || '';
 
@@ -869,11 +861,6 @@ function ConflictChallenge({ challenge, onComplete }) {
                 <textarea
                     value={resolved}
                     onChange={e => setResolved(e.target.value)}
-                    onPaste={e => {
-                        e.preventDefault();
-                        alert("⚠️ SECURITY TRIGGERED: No cheating! You must resolve the conflict manually.");
-                    }}
-                    onContextMenu={e => e.preventDefault()}
                     rows={7}
                     style={{
                         width: '100%', background: 'transparent', border: 'none', outline: 'none',

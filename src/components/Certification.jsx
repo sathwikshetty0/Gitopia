@@ -1,9 +1,9 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { getLevelInfo } from '../data/gameData';
 
 const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&family=Figtree:wght@400;500;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500;600;700&family=Figtree:wght@400;500;600;700;800&display=swap');
 
   :root {
     --neon: #39ff14;
@@ -20,7 +20,7 @@ const styles = `
     min-height: 100vh;
     background: var(--ink);
     color: var(--text);
-    padding: 2.5rem 2rem 5rem;
+    padding: 2rem 1.5rem 5rem;
   }
 
   .no-print {
@@ -33,150 +33,203 @@ const styles = `
     margin: 0 auto;
   }
 
-  /* ─── Certificate Card ─── */
+  /* ─── Certificate Card with Template Background ─── */
   .cert-card {
-    background: #ffffff;
-    color: #111111;
+    container-type: inline-size;
+    container-name: cert;
     width: 100%;
-    aspect-ratio: 1.414 / 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    aspect-ratio: 1448 / 1086;
     position: relative;
+    background-image: url('/certificate-template.png');
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    box-shadow: 0 40px 90px rgba(0,0,0,0.8), 0 0 40px rgba(57,255,20,0.1);
+    border-radius: 6px;
     overflow: hidden;
-    box-shadow: 0 40px 80px rgba(0,0,0,0.7);
-    border-radius: 4px;
-    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
   }
 
-  .cert-dotgrid {
+  .cert-card ::selection,
+  .cert-card *::selection {
+    background: transparent !important;
+    color: inherit !important;
+  }
+
+  /* ─── Overlay Elements Positioned Proportionally ─── */
+  .cert-overlay-name-box {
     position: absolute;
-    inset: 0;
-    background-image: radial-gradient(circle, #cccccc 0.5px, transparent 0.5px);
-    background-size: 22px 22px;
-    opacity: 0.15;
-    pointer-events: none;
-  }
-
-  .cert-inner {
-    height: 100%;
-    padding: 4rem 5rem;
+    left: 7.2%;
+    top: 46.6%;
+    width: 85%;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    position: relative;
-    z-index: 2;
-    box-sizing: border-box;
-  }
-
-  .cert-border-outer {
-    position: absolute;
-    inset: 2rem;
-    border: 2px solid #111;
+    justify-content: flex-end;
     pointer-events: none;
+    background: transparent !important;
   }
 
-  .cert-border-inner {
+  .cert-overlay-name {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 7cqw;
+    color: #0b0f14;
+    line-height: 1;
+    letter-spacing: 0.015em;
+    margin: 0;
+    background: transparent !important;
+    background-color: transparent !important;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Footer column 1: Under CREDENTIAL ID / GitHub link */
+  .cert-overlay-col1 {
     position: absolute;
-    inset: 2.4rem;
-    border: 1px solid var(--neon);
-    pointer-events: none;
-  }
-
-  .cert-header {
+    left: 7.2%;
+    top: 84.8%;
+    width: 32%;
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.2cqw;
+    pointer-events: auto;
   }
 
-  .cert-logo {
-    height: 80px;
-    margin-bottom: 2rem;
+  .cert-overlay-github {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.22cqw;
+    font-weight: 700;
+    color: #0b1a0e;
+    text-decoration: none;
+    line-height: 1.25;
+    word-break: break-all;
+    display: flex;
+    align-items: center;
+    gap: 0.4cqw;
+  }
+
+  .cert-overlay-cred-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.95cqw;
+    color: #15803d;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  /* Footer column 2: Under MASTERY RANK */
+  .cert-overlay-col2 {
+    position: absolute;
+    left: 47%;
+    top: 82.8%;
+    width: 25%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25cqw;
+    pointer-events: auto;
+  }
+
+  .cert-overlay-rank-title {
+    font-family: 'Figtree', sans-serif;
+    font-size: 1.6cqw;
+    font-weight: 800;
+    color: #0e622b;
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .cert-overlay-rank-xp {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.15cqw;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  .cert-overlay-rank-status {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85cqw;
+    color: #15803d;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  /* Footer column 3: Under DATE OF ISSUE & VERIFIED CORE_NODE */
+  .cert-overlay-col3-date {
+    position: absolute;
+    left: 74%;
+    top: 82.6%;
+    width: 21%;
+    pointer-events: auto;
+  }
+
+  .cert-overlay-date-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.18cqw;
+    font-weight: 700;
+    color: #111827;
+    letter-spacing: 0.02em;
+  }
+
+  .cert-overlay-col3-node {
+    position: absolute;
+    left: 74%;
+    top: 88.6%;
+    width: 21%;
+    pointer-events: auto;
+  }
+
+  .cert-overlay-node-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.05cqw;
+    font-weight: 700;
+    color: #0e622b;
+    letter-spacing: 0.05em;
+  }
+
+  /* ─── Editor Bar ─── */
+  .cert-editor-card {
+    background: rgba(22, 27, 34, 0.8);
+    border: 1px solid rgba(57, 255, 20, 0.2);
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-bottom: 1.75rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    backdrop-filter: blur(10px);
+  }
+
+  .cert-input-group label {
     display: block;
-    object-fit: contain;
-    mix-blend-mode: multiply;
-  }
-
-  .cert-org-h {
     font-family: 'DM Mono', monospace;
     font-size: 0.7rem;
-    letter-spacing: 0.2em;
-    color: #888;
-    text-transform: uppercase;
-    margin-bottom: 0.5rem;
+    color: var(--neon);
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.05em;
   }
 
-  .cert-title-h {
-    font-family: 'DM Serif Display', serif;
-    font-size: 3.5rem;
-    color: #111;
-    line-height: 1;
-    margin: 0;
+  .cert-input-group input {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    padding: 0.55rem 0.8rem;
+    color: #fff;
+    font-family: 'Figtree', sans-serif;
+    font-size: 0.88rem;
+    outline: none;
+    transition: border-color 0.2s;
   }
 
-  .cert-body-h {
-    margin: 2rem 0;
-  }
-
-  .cert-label-h {
-    font-size: 0.9rem;
-    color: #999;
-    margin-bottom: 1rem;
-  }
-
-  .cert-name-h {
-    font-family: 'DM Serif Display', serif;
-    font-size: 4.5rem;
-    color: #111;
-    line-height: 1;
-    margin: 0 0 1.5rem;
-    border-bottom: 3px solid var(--neon);
-    display: inline-block;
-    padding-bottom: 0.5rem;
-  }
-
-  .cert-desc-h {
-    font-size: 1.1rem;
-    color: #444;
-    line-height: 1.6;
-    max-width: 800px;
-  }
-
-  .cert-footer-h {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    border-top: 1px solid #eee;
-    padding-top: 2rem;
-  }
-
-  .cert-field-h {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-  }
-
-  .cert-field-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.6rem;
-    color: #bbb;
-    letter-spacing: 0.1em;
-  }
-
-  .cert-field-value {
-    font-weight: 700;
-    color: #111;
-    font-size: 1rem;
-  }
-
-  .cert-auth-h {
-    position: absolute;
-    bottom: 1.5rem;
-    right: 5rem;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.55rem;
-    color: #ccc;
+  .cert-input-group input:focus {
+    border-color: var(--neon);
   }
 
   /* ─── Actions ─── */
   .cert-actions-wrapper {
-    margin-top: 3rem;
+    margin-top: 2.5rem;
     text-align: center;
   }
 
@@ -186,46 +239,44 @@ const styles = `
     border: none;
     padding: 1rem 3rem;
     font-family: 'DM Mono', monospace;
-    font-weight: 700;
+    font-weight: 800;
     font-size: 1rem;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
-    box-shadow: 0 0 30px rgba(57,255,20,0.3);
+    box-shadow: 0 0 30px rgba(57,255,20,0.35);
     transition: all 0.2s;
+    letter-spacing: 0.05em;
   }
   .cert-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 0 45px rgba(57,255,20,0.5);
+    box-shadow: 0 0 45px rgba(57,255,20,0.6);
   }
 
   .cert-back-link {
-    display: block;
+    display: inline-block;
     margin-top: 1.5rem;
     color: var(--text-dim);
     text-decoration: none;
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     font-family: 'DM Mono', monospace;
   }
   .cert-back-link:hover {
-    color: var(--text);
+    color: var(--neon);
   }
 
   /* ─── Print Logic ─── */
   @media print {
-    /* Critical: Hide EVERYTHING in the document */
     * {
       visibility: hidden !important;
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
     }
 
-    /* Show ONLY the certificate card and its descendants */
     #certificate-print-area,
     #certificate-print-area * {
       visibility: visible !important;
     }
 
-    /* Absolute positioning to prevent parent layout shifts/white space */
     #certificate-print-area {
       position: fixed !important;
       left: 0 !important;
@@ -238,9 +289,12 @@ const styles = `
       box-shadow: none !important;
       border-radius: 0 !important;
       z-index: 99999 !important;
+      background-image: url('/certificate-template.png') !important;
+      background-size: 100% 100% !important;
+      background-position: center !important;
+      background-repeat: no-repeat !important;
     }
 
-    /* Clean up the page background */
     html, body, #root, .cert-page, .cert-container {
       background: white !important;
       margin: 0 !important;
@@ -249,343 +303,140 @@ const styles = `
       overflow: hidden !important;
     }
 
-    /* Ensure browser headers/footers are avoided */
     @page {
       size: A4 landscape;
       margin: 0;
     }
   }
-
-  /* ─── Verification Overlay ─── */
-  .verify-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.9);
-    backdrop-filter: blur(12px);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-  }
-
-  .verify-card {
-    background: #111;
-    border: 1px solid var(--neon);
-    padding: 3rem;
-    border-radius: 12px;
-    width: 600px;
-    max-width: 100%;
-    box-shadow: 0 0 50px rgba(57,255,20,0.15);
-  }
-
-  .verify-title {
-    font-size: 1.8rem;
-    font-weight: 800;
-    margin-bottom: 0.5rem;
-    color: var(--neon);
-    letter-spacing: 1px;
-  }
-
-  .verify-subtitle {
-    color: var(--text-dim);
-    font-size: 0.9rem;
-    margin-bottom: 2rem;
-    line-height:1.5;
-  }
-
-  .verify-group {
-    margin-bottom: 1.5rem;
-  }
-
-  .verify-label {
-    display: block;
-    font-size: 0.75rem;
-    color: var(--text-dim);
-    margin-bottom: 0.5rem;
-    font-family: 'DM Mono', monospace;
-    text-transform: uppercase;
-  }
-
-  .verify-input {
-    width: 100%;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    padding: 1rem;
-    color: white;
-    font-size: 1.1rem;
-    border-radius: 6px;
-    transition: all 0.2s;
-  }
-
-  .verify-input:focus {
-    outline: none;
-    border-color: var(--neon);
-    background: rgba(255,255,255,0.08);
-  }
 `;
 
-export default function Certification({ player, dispatch, onBack }) {
-  const certRef = useRef(null);
-  const { current } = getLevelInfo(player.xp);
-  
-  const [showVerify, setShowVerify] = useState(!player.hasClaimedCertificate);
-  const [form, setForm] = useState({
-    username: '',
-    email: player.email || '',
-    gitProfile: player.gitProfile || '',
-    feedback: player.feedback || '',
-    section: player.section || ''
-  });
-  const [nameError, setNameError] = useState(false);
-  const [feedbackError, setFeedbackError] = useState(false);
+export default function Certification({ player, onBack }) {
+    const certRef = useRef(null);
+    const { current } = getLevelInfo(player.xp);
 
-  const handleExport = () => {
-    const originalTitle = document.title;
-    document.title = `Gitopia_Certification_${player.username}`;
-    window.print();
-    document.title = originalTitle;
-  };
+    // Editable state so user can refine their certificate credentials live
+    const [name, setName] = useState(player.username || 'Bharath Kumar');
+    const [gitProfile, setGitProfile] = useState(
+        player.gitProfile || (player.username ? `github.com/${player.username.toLowerCase()}` : 'github.com/bharathkumar000')
+    );
 
-  const authId = `HEX_${Math.random().toString(36).substr(2, 8).toUpperCase()}`;
-
-  const handleVerify = () => {
-    if (!form.username.trim()) {
-      setNameError(true);
-      return;
-    }
-    if (!form.email) {
-      alert("Email is required for certification.");
-      return;
-    }
-    if (!form.section.trim()) {
-      alert("Section is required for certification.");
-      return;
-    }
-    if ((form.feedback || '').trim().length < 100) {
-      setFeedbackError(true);
-      return;
-    }
-    dispatch({ 
-      type: 'UPDATE_PLAYER_INFO', 
-      payload: { ...form, username: form.username.trim(), hasClaimedCertificate: true } 
+    const [authId] = useState(() => `NODE_0x${Math.random().toString(16).substring(2, 8).toUpperCase()}`);
+    const issueDate = new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
     });
-    setShowVerify(false);
-  };
 
-  // ─── Google Sheets Integration ───
-  useEffect(() => {
-    if (showVerify) return; // Wait until verified to sync
-
-    const syncData = async () => {
-      const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzhoECpyoOAHMmaokq0dTdkeyZCtVlg23W0MnJDm73rmAYuHIEyLn05Mp_u1R_hC32B/exec';
-
-      try {
-        await fetch(GOOGLE_SHEETS_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: player.username,
-            email: player.email || 'N/A',
-            section: player.section || 'N/A',
-            score: player.xp,
-            rank: current.title,
-            github: player.gitProfile || 'N/A',
-            feedback: player.feedback || 'N/A',
-            date: new Date().toISOString()
-          })
-        });
-      } catch (err) {
-        console.error("Sheet sync failed:", err);
-      }
+    const handleExport = () => {
+        const originalTitle = document.title;
+        document.title = `Gitopia_Mastery_Certificate_${name.replace(/\s+/g, '_')}`;
+        window.print();
+        document.title = originalTitle;
     };
 
-    syncData();
-  }, [showVerify, player.username, player.email]);
+    return (
+        <div className="cert-page">
+            <style>{styles}</style>
 
-  return (
-    <div className="cert-page">
-      <style>{styles}</style>
+            <div className="cert-container">
 
-      {showVerify && (
-        <div className="verify-overlay no-print">
-          <motion.div 
-            className="verify-card"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-          >
-            <h2 className="verify-title">Verify Credentials</h2>
-            <p className="verify-subtitle">
-              Please finalize your professional details. This information will be permanently 
-              encoded into your Certificate of Mastery and recorded in our authority cheatcodes registry.
-            </p>
+                {/* Top Header & Back Button */}
+                <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <button
+                        onClick={onBack}
+                        style={{
+                            background: 'none', border: '1px solid rgba(255,255,255,0.15)',
+                            padding: '0.4rem 0.8rem', borderRadius: '4px',
+                            color: 'var(--text-dim)', cursor: 'pointer', fontFamily: 'DM Mono', fontSize: '0.8rem'
+                        }}
+                    >
+                        ← RETURN TO MISSION MAP
+                    </button>
+                    <div style={{ color: 'var(--neon)', fontFamily: 'DM Mono', fontSize: '0.8rem' }}>
+                        ◈ OFFICIAL CERTIFICATE OF MASTERY
+                    </div>
+                </div>
 
-            <div className="verify-group">
-              <label className="verify-label">Full Name (for certificate) <span style={{ color: '#ff4444' }}>*</span></label>
-              <input 
-                className="verify-input"
-                value={form.username}
-                onChange={e => { setNameError(false); setForm({...form, username: e.target.value}); }}
-                placeholder="Enter your name"
-                style={nameError ? { borderColor: '#ff4444', background: 'rgba(255,68,68,0.08)' } : {}}
-                autoFocus
-              />
-              {nameError && (
-                <p style={{ color: '#ff4444', fontSize: '0.8rem', marginTop: '0.4rem', fontFamily: 'DM Mono, monospace' }}>
-                  NAME_REQUIRED — enter your name to generate the certificate.
-                </p>
-              )}
+                {/* Live Customizer Card (Hidden on Print) */}
+                <div className="cert-editor-card no-print">
+                    <div className="cert-input-group">
+                        <label>CERTIFIED NAME</label>
+                        <input
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            placeholder="Enter your full name"
+                        />
+                    </div>
+                    <div className="cert-input-group">
+                        <label>GITHUB PROFILE / URL</label>
+                        <input
+                            type="text"
+                            value={gitProfile}
+                            onChange={(e) => setGitProfile(e.target.value)}
+                            placeholder="github.com/username"
+                        />
+                    </div>
+                </div>
+
+                {/* ─── THE CERTIFICATE CANVAS WITH 2.png TEMPLATE ─── */}
+                <div id="certificate-print-area" ref={certRef} className="cert-card">
+
+                    {/* ① Name Overlay (Placed right above the green underline) */}
+                    <div className="cert-overlay-name-box">
+                        <h2 className="cert-overlay-name">
+                            {name.toUpperCase()}
+                        </h2>
+                    </div>
+
+                    {/* ② Column 1: CREDENTIAL ID & GitHub Link */}
+                    <div className="cert-overlay-col1">
+                        <div className="cert-overlay-github" title={gitProfile}>
+                            {gitProfile.startsWith('http') ? gitProfile.replace(/^https?:\/\//, '') : gitProfile}
+                        </div>
+                        <div className="cert-overlay-cred-sub">
+                            ID: {authId.replace('NODE_', 'GIT_')}
+                        </div>
+                    </div>
+
+                    {/* ③ Column 2: MASTERY RANK */}
+                    <div className="cert-overlay-col2">
+                        <div className="cert-overlay-rank-title">
+                            {current.title}
+                        </div>
+                        <div className="cert-overlay-rank-xp">
+                            Level {current.level} • {player.xp.toLocaleString()} XP
+                        </div>
+                        <div className="cert-overlay-rank-status">
+                            ✓ PROTOCOLS VERIFIED
+                        </div>
+                    </div>
+
+                    {/* ④ Column 3: DATE OF ISSUE */}
+                    <div className="cert-overlay-col3-date">
+                        <div className="cert-overlay-date-val">
+                            {issueDate}
+                        </div>
+                    </div>
+
+                </div>
+
+                {/* Actions & Print Prompt */}
+                <div className="cert-actions-wrapper no-print">
+                    <button className="cert-btn" onClick={handleExport}>
+                        🖨️ PRINT / DOWNLOAD CERTIFICATE (PDF)
+                    </button>
+                    <div style={{ marginTop: '1.25rem', opacity: 0.6, fontSize: '0.75rem', color: 'var(--text-dim)', fontFamily: 'DM Mono' }}>
+                        TIP: IN PRINT PREVIEW, SELECT <strong style={{ color: '#fff' }}>LANDSCAPE</strong> AND SET MARGINS TO <strong style={{ color: '#fff' }}>NONE</strong> FOR 100% CLEAN FIT.
+                    </div>
+                    <div>
+                        <a href="#" onClick={(e) => { e.preventDefault(); onBack(); }} className="cert-back-link">
+                            ← BACK TO DASHBOARD
+                        </a>
+                    </div>
+                </div>
+
             </div>
-
-            <div className="verify-group">
-              <label className="verify-label">Professional Email</label>
-              <input 
-                className="verify-input"
-                type="email"
-                value={form.email}
-                onChange={e => setForm({...form, email: e.target.value})}
-                placeholder="name@company.com"
-              />
-            </div>
-
-            <div className="verify-group">
-              <label className="verify-label">Section (Required)</label>
-              <input 
-                className="verify-input"
-                value={form.section}
-                onChange={e => setForm({...form, section: e.target.value})}
-                placeholder="e.g. A, B, or Batch Name"
-              />
-            </div>
-
-            <div className="verify-group">
-              <label className="verify-label">GitHub Handle (Optional)</label>
-              <input 
-                className="verify-input"
-                value={form.gitProfile}
-                onChange={e => setForm({...form, gitProfile: e.target.value})}
-                placeholder="@username"
-              />
-            </div>
-
-            <div className="verify-group">
-              <label className="verify-label">Feedback (Minimum 100 characters) <span style={{ color: '#ff4444' }}>*</span></label>
-              <textarea 
-                className="verify-input"
-                style={feedbackError ? { resize: 'vertical', minHeight: '80px', fontFamily: 'inherit', boxSizing: 'border-box', borderColor: '#ff4444', background: 'rgba(255,68,68,0.08)' } : { resize: 'vertical', minHeight: '80px', fontFamily: 'inherit', boxSizing: 'border-box' }}
-                value={form.feedback}
-                onChange={e => { setFeedbackError(false); setForm({...form, feedback: e.target.value}); }}
-                placeholder="Share your thoughts about Gitopia (at least 100 characters)..."
-              />
-              <div style={{ textAlign: 'right', fontSize: '0.75rem', color: (form.feedback || '').length < 100 ? '#ff4444' : '#39ff14', marginTop: '0.3rem', fontFamily: 'DM Mono, monospace' }}>
-                {(form.feedback || '').length} / 100
-              </div>
-              {feedbackError && (
-                <p style={{ color: '#ff4444', fontSize: '0.8rem', marginTop: '0.4rem', fontFamily: 'DM Mono, monospace' }}>
-                  FEEDBACK_TOO_SHORT — Please provide at least 100 characters.
-                </p>
-              )}
-            </div>
-
-            <button 
-              className="cert-btn" 
-              style={{ width: '100%', marginTop: '1rem' }}
-              onClick={handleVerify}
-            >
-              FINALIZE & GENERATE
-            </button>
-            
-            <button 
-                onClick={onBack}
-                style={{ background: 'none', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', fontFamily: 'DM Mono', fontSize: '0.8rem', width: '100%', marginTop: '1.5rem' }}
-            >
-                CANCEL_ACCREDITATION
-            </button>
-          </motion.div>
         </div>
-      )}
-
-      <div className="cert-container">
-
-        {/* Navigation - Hidden in print */}
-        <div className="no-print" style={{ marginBottom: '2rem' }}>
-          <button
-            onClick={onBack}
-            style={{ background: 'none', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', fontFamily: 'DM Mono', fontSize: '0.8rem' }}
-          >
-            ← SYSTEM_EXIT
-          </button>
-        </div>
-
-        {/* THE CERTIFICATE */}
-        <div id="certificate-print-area" ref={certRef} className="cert-card">
-          <div className="cert-dotgrid" />
-          <div className="cert-border-outer" />
-          <div className="cert-border-inner" />
-
-          <div className="cert-inner">
-            <header className="cert-header">
-              <div>
-                <img src="/inunity-logo.png" alt="Inunity Logo" className="cert-logo" />
-                <div className="cert-org-h">GITOPIA_ACCREDITATION_AUTHORITY</div>
-                <h1 className="cert-title-h">Certificate of Mastery</h1>
-                <div style={{ color: '#888', fontStyle: 'italic', marginTop: '0.5rem' }}>Full Stack Version Control Mastery</div>
-              </div>
-            </header>
-
-            <main className="cert-body-h">
-              <div className="cert-label-h">This document certifies that</div>
-              <h2 className="cert-name-h">{player.username.toUpperCase()}</h2>
-              <p className="cert-desc-h">
-                Has successfully navigated the complex protocols of <strong style={{ color: '#111' }}>GITOPIA</strong>,
-                demonstrating expertise in branch manipulation, atomic commit architecture, resolution of
-                dynamic merge conflicts, and professional collaborative integration.
-                Total mastery points achieved: <strong>{player.xp}</strong> out of <strong>2450</strong> possible points.
-              </p>
-            </main>
-
-            <footer className="cert-footer-h">
-              <div className="cert-field-h">
-                <span className="cert-field-label">CREDENTIAL_ID</span>
-                <span className="cert-field-value">{player.gitProfile || 'GUEST_PROTO_USER'}</span>
-                <span style={{ fontSize: '0.7rem', color: '#999' }}>{player.email}</span>
-              </div>
-              <div className="cert-field-h" style={{ alignItems: 'center', textAlign: 'center' }}>
-                <span className="cert-field-label">MASTERY_RANK</span>
-                <span className="cert-field-value" style={{ color: 'var(--neon)' }}>{current.title}</span>
-                <span style={{ fontSize: '0.7rem', color: '#999' }}>XP: {player.xp.toLocaleString()}</span>
-              </div>
-              <div className="cert-field-h" style={{ alignItems: 'flex-end', textAlign: 'right' }}>
-                <span className="cert-field-label">DATE_OF_ISSUE</span>
-                <span className="cert-field-value">{new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).toUpperCase()}</span>
-                <span style={{ fontSize: '0.7rem', color: '#999' }}>VERIFIED_CORE_NODE</span>
-              </div>
-            </footer>
-
-            <div className="cert-auth-h">
-              {authId}
-            </div>
-          </div>
-        </div>
-
-        {/* Actions - Hidden in print */}
-        <div className="cert-actions-wrapper no-print">
-          <p style={{ color: 'var(--text-dim)', fontStyle: 'italic', marginBottom: '2rem' }}>
-            "The repository of knowledge is the only one that truly matters."
-          </p>
-          <button className="cert-btn" onClick={handleExport}>
-            💾 DOWNLOAD PDF CERTIFICATE
-          </button>
-          <div style={{ marginTop: '1.5rem', opacity: 0.4, fontSize: '0.7rem', color: 'var(--text-dim)', fontFamily: 'DM Mono' }}>
-            FOR BEST OUTPUT: SELECT <span style={{ color: '#fff' }}>LANDSCAPE</span> & <span style={{ color: '#fff' }}>MARGINS: NONE</span>
-          </div>
-          <a href="#" onClick={(e) => { e.preventDefault(); onBack(); }} className="cert-back-link">
-            LOGOUT_SESSION
-          </a>
-        </div>
-
-      </div>
-    </div>
-  );
+    );
 }

@@ -287,6 +287,62 @@ function SkillTree({ player, dispatch }) {
 
     return (
         <div>
+            {player.adminMode && (
+                <div style={{
+                    background: 'rgba(57, 255, 20, 0.08)',
+                    border: '1.5px solid var(--neon)',
+                    borderRadius: '8px',
+                    padding: '0.75rem 1.25rem',
+                    marginBottom: '1.25rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    boxShadow: '0 0 20px rgba(57, 255, 20, 0.15)',
+                    flexWrap: 'wrap',
+                    gap: '0.75rem',
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <span style={{ fontSize: '1.2rem' }}>⚡</span>
+                        <div>
+                            <div className="pixel neon-text" style={{ fontSize: '0.62rem' }}>
+                                ADMIN ACCESS CONTROL ACTIVE
+                            </div>
+                            <div className="dim-text" style={{ fontSize: '0.72rem' }}>
+                                ALL LEVELS UNLOCKED • FULL 100% COMPLETION • GIT GOD
+                            </div>
+                        </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button
+                            className="btn"
+                            style={{
+                                background: 'linear-gradient(45deg, var(--gold), #ff8c00)',
+                                color: '#000',
+                                border: 'none',
+                                fontSize: '0.7rem',
+                                padding: '0.35rem 0.8rem',
+                                fontWeight: 800,
+                            }}
+                            onClick={() => dispatch({ type: 'SET_VIEW', payload: 'certification' })}
+                        >
+                            🎓 CERTIFICATE
+                        </button>
+                        <button
+                            className="btn"
+                            style={{
+                                borderColor: 'rgba(255,77,77,0.4)',
+                                color: 'var(--red)',
+                                fontSize: '0.7rem',
+                                padding: '0.35rem 0.8rem',
+                            }}
+                            onClick={() => dispatch({ type: 'ADMIN_RESET_PROGRESS' })}
+                        >
+                            RESET
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Header with progress */}
             <div style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -333,7 +389,7 @@ function SkillTree({ player, dispatch }) {
 
 function MissionNode({ mod, player, dispatch, index }) {
     const isCompleted = player.completedMissions.includes(mod.id);
-    const isLocked = mod.deps.some(dep => !player.completedMissions.includes(dep));
+    const isLocked = !player.adminMode && mod.deps.some(dep => !player.completedMissions.includes(dep));
     const isAvailable = !isLocked && !isCompleted;
 
     const borderColor = isCompleted ? 'var(--blue)' : isAvailable ? mod.color : 'rgba(255,255,255,0.06)';

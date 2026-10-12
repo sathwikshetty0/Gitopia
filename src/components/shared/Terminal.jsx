@@ -22,8 +22,8 @@ export function Terminal({ prompt = 'project/', expected = [], onSuccess, onErro
     }, [history]);
 
     const runCommand = (cmd) => {
-        const trimmed = cmd.trim();
-        const isCorrect = expected.some(e => trimmed === e);
+        const trimmed = cmd.trim().replace(/\s+/g, ' ');
+        const isCorrect = expected.some(e => trimmed === e.trim().replace(/\s+/g, ' '));
 
         const newHistory = [...history, {
             prompt,

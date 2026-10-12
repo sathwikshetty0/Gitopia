@@ -8,6 +8,7 @@ import Profile from './components/Profile';
 import Reference from './components/Reference';
 import Certification from './components/Certification';
 import Footer from './components/Footer';
+import AdminAccess from './components/AdminAccess';
 
 const STORAGE_KEY = 'gitopia_v1_state';
 
@@ -31,6 +32,36 @@ const PAGE_TRANSITION = {
 
 export default function App() {
   const [state, dispatch] = useReducer(gameReducer, undefined, loadState);
+  const [showAdminModal, setShowAdminModal] = useState(false);
+
+  // Check URL on load and on navigation for /admin or #admin
+  useEffect(() => {
+    const checkUrl = () => {
+      const path = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
+      if (path === '/admin' || path.startsWith('/admin') || hash === '#admin' || hash.startsWith('#admin')) {
+        setShowAdminModal(true);
+      }
+    };
+
+    checkUrl();
+    window.addEventListener('popstate', checkUrl);
+    window.addEventListener('hashchange', checkUrl);
+    return () => {
+      window.removeEventListener('popstate', checkUrl);
+      window.removeEventListener('hashchange', checkUrl);
+    };
+  }, []);
+
+  const handleAdminUnlock = () => {
+    dispatch({ type: 'ADMIN_UNLOCK_ALL' });
+    if (window.location.pathname.toLowerCase().includes('/admin')) {
+      window.history.replaceState({}, '', '/');
+    }
+    if (window.location.hash.toLowerCase().includes('admin')) {
+      window.location.hash = '';
+    }
+  };
 
   // Persist player to localStorage on every player change
   useEffect(() => {
@@ -50,9 +81,20 @@ export default function App() {
       display: 'flex',
       flexDirection: 'column',
       position: 'relative',
-      userSelect: 'none',
-      WebkitUserSelect: 'none'
     }}>
+      <AdminAccess
+        isOpen={showAdminModal}
+        onClose={() => {
+          setShowAdminModal(false);
+          if (window.location.pathname.toLowerCase().includes('/admin')) {
+            window.history.replaceState({}, '', '/');
+          }
+          if (window.location.hash.toLowerCase().includes('admin')) {
+            window.location.hash = '';
+          }
+        }}
+        onUnlock={handleAdminUnlock}
+      />
       <SecurityShield />
       {/* Background decoration — always behind */}
       <BackgroundDecor />
@@ -210,90 +252,8 @@ function MissionProgressStrip({ missionPhase, dispatch }) {
  * Deterrant against screenshots and screen recording
  */
 function SecurityShield() {
-  const [isSecure, setIsSecure] = useState(true);
-
-  useEffect(() => {
-    // 1. Prevent Right Click
-    const handleContextMenu = (e) => e.preventDefault();
-    
-    // 2. Prevent Common Screenshot & Inspect Shortcuts
-    const handleKeyDown = (e) => {
-      // PrintScreen
-      if (e.key === 'PrintScreen') {
-        alert('Screenshots are disabled for security reasons.');
-        e.preventDefault();
-      }
-
-      // Cmd+Shift+3/4 (Mac) or Win+Shift+S (Windows) triggers are OS level, 
-      // but we can catch certain combinations
-      if ((e.metaKey || e.ctrlKey) && (e.key === 's' || e.key === 'p' || e.key === 'S' || e.key === 'P')) {
-        e.preventDefault();
-      }
-
-      // Disable F12 and Inspect
-      if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C'))) {
-        e.preventDefault();
-      }
-      if (e.metaKey && e.altKey && (e.key === 'i' || e.key === 'I')) {
-        e.preventDefault();
-      }
-    };
-
-    // 3. Focus Monitoring (Deter Screen Recording)
-    const handleFocus = () => setIsSecure(true);
-    const handleBlur = () => setIsSecure(false);
-
-    window.addEventListener('contextmenu', handleContextMenu);
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('focus', handleFocus);
-    window.addEventListener('blur', handleBlur);
-
-    return () => {
-      window.removeEventListener('contextmenu', handleContextMenu);
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('focus', handleFocus);
-      window.removeEventListener('blur', handleBlur);
-    };
-  }, []);
-
   return (
     <>
-      {/* Visual Shield: Blurs content when focus is lost */}
-      <AnimatePresence>
-        {!isSecure && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{
-              position: 'fixed',
-              inset: 0,
-              zIndex: 9999,
-              background: 'rgba(0,0,0,0.97)',
-              backdropFilter: 'blur(30px)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'var(--neon)',
-              fontFamily: 'var(--font-pixel)',
-              textAlign: 'center',
-              padding: '2rem'
-            }}
-          >
-            <motion.div
-              style={{ fontSize: '3rem', marginBottom: '1rem' }}
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >⚠️</motion.div>
-            <div style={{ fontSize: '1.2rem', letterSpacing: '2px' }}>SECURITY_SHIELD_ACTIVE</div>
-            <div className="dim-text" style={{ fontSize: '0.8rem', marginTop: '1rem', fontFamily: 'var(--font-code)' }}>
-              WINDOW FOCUS LOST // CONTENT PROTECTED
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Persistent subtle watermark across the screen */}
       <div style={{
         position: 'fixed',

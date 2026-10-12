@@ -4,17 +4,17 @@
 
 export const LEVELS = [
     { level: 1, minXP: 0, title: 'Git Rookie' },
-    { level: 2, minXP: 150, title: 'Commit Cadet' },
-    { level: 3, minXP: 400, title: 'Branch Scout' },
-    { level: 4, minXP: 750, title: 'Merge Apprentice' },
-    { level: 5, minXP: 1200, title: 'Commit Knight' },
-    { level: 6, minXP: 1700, title: 'Branch Paladin' },
-    { level: 7, minXP: 2200, title: 'Rebase Ranger' },
-    { level: 8, minXP: 2700, title: 'Conflict Slayer' },
-    { level: 9, minXP: 3300, title: 'Remote Warrior' },
-    { level: 10, minXP: 3900, title: 'Merge Master' },
-    { level: 15, minXP: 4300, title: 'Git Ninja' },
-    { level: 20, minXP: 4600, title: 'Git God' },
+    { level: 2, minXP: 100, title: 'Commit Cadet' },
+    { level: 3, minXP: 250, title: 'Branch Scout' },
+    { level: 4, minXP: 450, title: 'Merge Apprentice' },
+    { level: 5, minXP: 700, title: 'Commit Knight' },
+    { level: 6, minXP: 900, title: 'Branch Paladin' },
+    { level: 7, minXP: 1100, title: 'Remote Warrior' },
+    { level: 8, minXP: 1400, title: 'Conflict Slayer' },
+    { level: 9, minXP: 1750, title: 'Rebase Ranger' },
+    { level: 10, minXP: 2050, title: 'Collab Pro' },
+    { level: 11, minXP: 2250, title: 'Open Source Hero' },
+    { level: 12, minXP: 2450, title: 'Git God' },
 ];
 
 export function getLevelInfo(xp) {
@@ -92,10 +92,10 @@ export const MODULES = [
                 context: 'Git operates locally on your machine. To start tracking a project, you need to set up a Git cheatcode repository inside your project folder.',
                 instruction: 'Initialize a new Git repository in your project folder.',
                 prompt: 'project/',
-                expected: ['git init'],
+                expected: ['git init', 'git init .'],
                 successMsg: 'Initialized empty Git repository! .git folder created.',
                 hints: ['The command starts with git', 'Think: git ___t'],
-                xp: 30,
+                xp: 25,
             },
             {
                 id: 'c2',
@@ -110,7 +110,7 @@ export const MODULES = [
                 ],
                 correct: 1,
                 hints: ['It shows what\'s changed and what\'s staged'],
-                xp: 30,
+                xp: 25,
             },
             {
                 id: 'c3',
@@ -120,7 +120,7 @@ export const MODULES = [
                 options: ['git history', 'git show', 'git log', 'git trace'],
                 correct: 2,
                 hints: ['Like a ship\'s log — it records what happened'],
-                xp: 40,
+                xp: 25,
             },
             {
                 id: 'c4',
@@ -130,7 +130,7 @@ export const MODULES = [
                 options: ['git init', 'git copy', 'git clone', 'git download'],
                 correct: 2,
                 hints: ['Think of making a precise "clone" of the remote project'],
-                xp: 40,
+                xp: 25,
             },
         ],
         graphSteps: [
@@ -157,8 +157,8 @@ export const MODULES = [
                 '  ↳ The dot (.) represents your current directory.',
                 'git commit -m "msg"   →  saves a permanent snapshot.',
                 'Each commit gets a unique SHA hash (e.g. a3f4bc2).',
-                'git push origin main  →  uploads your code to the cloud.',
-                '  ↳ push: upload | origin: remote server | main: branch name',
+                'git push origin main  →  uploads your code to the remote repository.',
+                '  ↳ push: upload | origin: remote repo nickname | main: branch name',
                 'Think of it as: edit  →  stage  →  save for history.',
             ],
             ascii: `
@@ -424,9 +424,9 @@ export const MODULES = [
                 'GIT vs GITHUB: A remote is exactly where GitHub comes in.',
                 'It is a version of your repo hosted on the internet.',
                 'GitHub, GitLab, and Bitbucket are platforms that host these remotes.',
-                'git remote add origin <url>  →  links local to remote.',
-                'git push origin main  →  uploads commits to remote server.',
-                '  ↳ push: upload | origin: remote server | main: branch name',
+                'git remote add origin <url>  →  links local to remote under alias "origin".',
+                'git push origin main  →  uploads commits to remote repository.',
+                '  ↳ push: upload | origin: remote repo nickname/alias | main: branch name',
                 'git pull  →  fetch + merge remote changes into local.',
             ],
             ascii: `
@@ -457,7 +457,7 @@ export const MODULES = [
                 context: 'Pushing takes your local Git commits and sends them to the remote GitHub repository.',
                 instruction: 'Push your local "main" branch to the remote named "origin".',
                 prompt: 'project/ (main)',
-                expected: ['git push origin main', 'git push'],
+                expected: ['git push origin main', 'git push -u origin main', 'git push'],
                 successMsg: '✓ Branch pushed to origin/main!',
                 hints: ['git push <remote> <branch>', 'The default remote is called "origin"'],
                 xp: 60,
@@ -588,8 +588,12 @@ console.log("Hello from main")
 console.log("Hello from loginpage")
 >>>>>>> loginpage`,
                 correct: 'console.log("Hello from loginpage")',
-                hints: ['Remove the conflict markers', 'Keep only the loginpage version'],
-                xp: 100,
+                hints: [
+                    'Delete lines with <<<<<<< HEAD, =======, and >>>>>>> loginpage',
+                    'Delete console.log("Hello from main")',
+                    'Keep only: console.log("Hello from loginpage")'
+                ],
+                xp: 120,
             },
             {
                 id: 'c2',
@@ -605,20 +609,39 @@ console.log("Hello from loginpage")
                 ],
                 correct: 1,
                 hints: ['Stage the resolved file → commit the merge'],
-                xp: 80,
+                xp: 90,
             },
             {
                 id: 'c3',
                 type: 'multiple_choice',
+                forceMCQ: true,
                 context: 'If a merge gets too messy, you can always bail out and return your repo to how it was before.',
                 question: 'Which command cancels an in-progress merge?',
                 options: ['git merge --stop', 'git merge --abort', 'git reset --hard', 'git undo-merge'],
                 correct: 1,
                 hints: ['The flag is --abort'],
-                xp: 70,
+                xp: 90,
             },
         ],
-        graphSteps: [],
+        graphSteps: [
+            {
+                nodes: [
+                    { id: 'a', label: 'C1', x: 80, y: 90, branch: 'main' },
+                    { id: 'b', label: 'C2', x: 230, y: 90, branch: 'main' },
+                    { id: 'c', label: 'L1', x: 380, y: 200, branch: 'loginpage', isHead: true },
+                ],
+                edges: [{ from: 'a', to: 'b' }, { from: 'b', to: 'c' }]
+            },
+            {
+                nodes: [
+                    { id: 'a', label: 'C1', x: 80, y: 90, branch: 'main' },
+                    { id: 'b', label: 'C2', x: 230, y: 90, branch: 'main' },
+                    { id: 'c', label: 'L1', x: 380, y: 200, branch: 'loginpage' },
+                    { id: 'm', label: '⚔️ M', x: 530, y: 90, branch: 'main', isHead: true, isMerge: true },
+                ],
+                edges: [{ from: 'a', to: 'b' }, { from: 'b', to: 'c' }, { from: 'b', to: 'm' }, { from: 'c', to: 'm' }]
+            }
+        ],
     },
 
     // ──────────────────────────────────────────────────────────
@@ -657,7 +680,7 @@ console.log("Hello from loginpage")
                 expected: ['git rebase main'],
                 successMsg: 'loginpage branch replayed on top of main! Linear history achieved.',
                 hints: ['git rebase <base-branch>'],
-                xp: 100,
+                xp: 130,
             },
             {
                 id: 'c2',
@@ -672,11 +695,12 @@ console.log("Hello from loginpage")
                 ],
                 correct: 1,
                 hints: ['Clean linear history — no merge commits'],
-                xp: 80,
+                xp: 110,
             },
             {
                 id: 'c3',
                 type: 'scenario',
+                forceMCQ: true,
                 context: 'Rebase conflicts happen commit-by-commit. You resolve them one at a time.',
                 situation: 'You ran `git rebase main` and a conflict appeared. How do you continue?',
                 question: 'After resolving the conflict and staging the file:',
@@ -688,10 +712,29 @@ console.log("Hello from loginpage")
                 ],
                 correct: 2,
                 hints: ['Same pattern as merge: resolve  ────────►  add  ────────►  continue'],
-                xp: 80,
+                xp: 110,
             },
         ],
-        graphSteps: [],
+        graphSteps: [
+            {
+                nodes: [
+                    { id: 'a', label: 'M1', x: 80, y: 90, branch: 'main' },
+                    { id: 'b', label: 'M2', x: 230, y: 90, branch: 'main' },
+                    { id: 'c', label: 'L1', x: 230, y: 200, branch: 'loginpage' },
+                    { id: 'd', label: 'L2', x: 380, y: 200, branch: 'loginpage', isHead: true },
+                ],
+                edges: [{ from: 'a', to: 'b' }, { from: 'a', to: 'c' }, { from: 'c', to: 'd' }]
+            },
+            {
+                nodes: [
+                    { id: 'a', label: 'M1', x: 80, y: 90, branch: 'main' },
+                    { id: 'b', label: 'M2', x: 230, y: 90, branch: 'main' },
+                    { id: 'c', label: "L1'", x: 380, y: 90, branch: 'loginpage' },
+                    { id: 'd', label: "L2'", x: 530, y: 90, branch: 'loginpage', isHead: true },
+                ],
+                edges: [{ from: 'a', to: 'b' }, { from: 'b', to: 'c' }, { from: 'c', to: 'd' }]
+            }
+        ],
     },
 
     // ──────────────────────────────────────────────────────────
@@ -728,7 +771,7 @@ console.log("Hello from loginpage")
                 options: ['develop', 'release', 'main', 'staging'],
                 correct: 2,
                 hints: ['GitHub Flow is simple: always branch from main'],
-                xp: 80,
+                xp: 100,
             },
             {
                 id: 'c2',
@@ -754,7 +797,7 @@ console.log("Hello from loginpage")
                 options: ['A new feature', 'A bug fix', 'Documentation update', 'Test additions'],
                 correct: 1,
                 hints: ['Conventional Commits spec: feat, fix, docs, chore...'],
-                xp: 70,
+                xp: 100,
             },
         ],
         graphSteps: [],
@@ -775,7 +818,7 @@ console.log("Hello from loginpage")
             lines: [
                 'Fork: copy someone\'s repo to your GitHub account.',
                 'Clone: download your fork to your local machine.',
-                'Create a loginpage branch, commit, push to YOUR fork.',
+                'Create a feature branch (e.g. my-fix), commit, push to YOUR fork.',
                 'Open a PR from your fork  ────────►  upstream repo.',
                 'Good first issues are labeled "good first issue" on GitHub.',
             ],
@@ -808,7 +851,7 @@ console.log("Hello from loginpage")
                     'Open a PR to the upstream repo',
                 ],
                 hints: ['Fork first → clone YOUR fork', 'Push to fork → open PR'],
-                xp: 120,
+                xp: 160,
             },
             {
                 id: 'c2',
@@ -824,18 +867,19 @@ console.log("Hello from loginpage")
                 ],
                 correct: 1,
                 hints: ['Add the upstream remote under the name "upstream"'],
-                xp: 100,
+                xp: 120,
             },
             {
                 id: 'c3',
                 type: 'scenario',
+                forceMCQ: true,
                 context: 'Signing commits proves your identity cryptographically. Many major open source projects require it.',
                 situation: 'The upstream project\'s CONTRIBUTING.md says: "Sign your commits". How?',
                 question: 'Which Git flag signs a commit with your GPG key?',
                 options: ['git commit --sign', 'git commit -S', 'git commit --gpg', 'git sign -m "msg"'],
                 correct: 1,
                 hints: ['Capital -S flag enables GPG signing'],
-                xp: 80,
+                xp: 120,
             },
         ],
         graphSteps: [],
