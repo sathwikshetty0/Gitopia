@@ -1,7 +1,7 @@
 # ⚡ Gitopia Learn Git Like a Game
 
-> **A fully interactive, gamified Git learning app built with React + Vite.**
-> Master Git from `git init` to open-source contributions — through missions, a live terminal simulator, and a visual commit graph.
+> **A mobile-friendly, gamified Git learning app built with React and Vite.**
+> Learn Git from `git init` to open-source contributions with guided missions, an interactive terminal simulator, and visual commit graphs.
 
 ![Gitopia Dashboard](./docs/dashboard.png)
 
@@ -9,12 +9,13 @@
 
 ## 🎮 What is Gitopia?
 
-Gitopia turns learning Git into a hacker-themed mission game. Instead of reading documentation, you:
+Gitopia turns learning Git into a hacker-themed mission game. Instead of only reading documentation, you:
 
-- **Run real Git commands** in a simulated terminal
-- **Watch the commit graph update** in real time
+- **Practice Git commands** in a simulated terminal; commands are checked against each challenge, not run on your computer
+- **Explore visual commit graphs** that explain commits, branches, merges, and rebases
 - **Earn XP and badges** as you progress
 - **Unlock new modules** in a progression tree
+- **Look up commands** in a searchable cheat sheet and copy commands or examples
 
 The aesthetic is inspired by **Hacknet**, **GitHub CLI**, and cyberpunk HUD dashboards — dark terminal theme, neon green accents, glassmorphism panels, and pixel fonts.
 
@@ -30,14 +31,14 @@ The aesthetic is inspired by **Hacknet**, **GitHub CLI**, and cyberpunk HUD dash
 | Phase | What Happens |
 |-------|-------------|
 | **① Briefing** | Animated line-by-line reveal of key concepts + ASCII diagram + live commit graph |
-| **② Challenges** | Interactive challenges (5 types) that teach the concept hands-on |
+| **② Challenges** | Interactive challenges (6 types) that teach the concept hands-on |
 | **③ Reward** | Animated XP counter, level-up check, badge unlock |
 
-### 🖥️ Interactive Terminal
+### 🖥️ Interactive Terminal Simulator
 - Fake bash prompt with blinking cursor
 - Validates your command against expected answers
 - Red border flash on wrong input, green glow on success
-- Hint system (costs −10 XP each)
+- Hints and attempt/time penalties are reflected in challenge scores
 
 ### 🌿 Live Commit Graph
 - Powered by **React Flow** (`@xyflow/react`)
@@ -45,7 +46,7 @@ The aesthetic is inspired by **Hacknet**, **GitHub CLI**, and cyberpunk HUD dash
 - Step-by-step graph progression during briefing
 - Branch-colored edges (main = green, feature = blue, merge = purple)
 
-### 🎯 5 Challenge Types
+### 🎯 Challenge Types
 | Type | Description |
 |------|-------------|
 | `terminal` | Type a Git command in the simulator |
@@ -54,6 +55,12 @@ The aesthetic is inspired by **Hacknet**, **GitHub CLI**, and cyberpunk HUD dash
 | `order` | Click to arrange Git steps in the correct sequence |
 | `fix_command` | Find and fix the broken Git command |
 | `fix_conflict` | Edit a merge conflict and remove all markers |
+
+### 📊 Scoring
+- Challenge XP weights are normalized to the mission's advertised reward.
+- Incorrect attempts, hints, and elapsed time reduce the challenge score; scores never go below zero.
+- A perfect first-time completion awards the mission's listed XP. Replaying a completed mission does not award XP again.
+- The current missions offer a total of **2,450 XP** across all first-time completions.
 
 ### 🏆 Progression System
 
@@ -74,10 +81,10 @@ The aesthetic is inspired by **Hacknet**, **GitHub CLI**, and cyberpunk HUD dash
 | 11 | Git Ninja | 4300 XP |
 | 12 | Git God | 4600 XP |
 
-*Note: Achieving "Git God" requires acquiring maximum available XP across all modules. Requesting hints will drain XP!*
+*With the current mission rewards, a perfect run across every mission awards 2,450 XP. Levels above the 2,200 XP Rebase Ranger threshold are not currently reachable through mission XP.*
 
 - **11 badges**: one per module + completion badge
-- **Streak counter**: days in a row
+- **Streak stat** displayed in the player profile
 - **Stats**: commands run, hints used, missions completed
 
 ### 👾 Player Profile
@@ -89,7 +96,17 @@ The aesthetic is inspired by **Hacknet**, **GitHub CLI**, and cyberpunk HUD dash
 ### 📡 Git Command Database
 - Searchable catalog of all core Git commands
 - Syntax examples and usage descriptions
-- One-click copy to clipboard
+- Dedicated copy buttons for commands and examples, with copy feedback
+- Filter by command category
+
+### 📱 Responsive UI and visibility pause
+- Dashboard, missions, profile, cheat sheet, and certificate layouts adapt to mobile screens.
+- The app pauses visually while its browser tab is hidden and resumes when the tab becomes visible.
+- The visibility pause is a user-experience feature, not screenshot protection or a security boundary.
+
+### 🏅 Certificate
+- Generate and print a certificate after completing all 10 modules.
+- Certificate details require a name, email, section, and feedback.
 
 ### 💾 Persistence
 - All progress saved to **localStorage**
@@ -118,10 +135,10 @@ The aesthetic is inspired by **Hacknet**, **GitHub CLI**, and cyberpunk HUD dash
 
 | Technology | Purpose |
 |-----------|---------|
-| **React 18** | UI framework |
+| **React 19** | UI framework |
 | **Vite** | Build tool and dev server |
 | **@xyflow/react** | Commit graph visualization |
-| **Framer Motion** | Page transitions, card animations, reward screen |
+| **Framer Motion** | Page transitions, card animations, and reward screen |
 | **CSS Variables** | Full design system (no Tailwind, no CSS-in-JS) |
 | **localStorage** | Game state persistence |
 | **Press Start 2P** | Pixel-style heading font (Google Fonts) |
@@ -132,18 +149,18 @@ The aesthetic is inspired by **Hacknet**, **GitHub CLI**, and cyberpunk HUD dash
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+
-- npm 9+
+- Node.js 20.19+ or 22.12+ (required by Vite 8)
+- npm
 
 ### Install & Run
 
 ```bash
 # Clone the repo
-git clone https://github.com/yourusername/Gitopia.git
+git clone https://github.com/sathwikshetty0/Gitopia.git
 cd Gitopia
 
 # Install dependencies
-npm install
+npm ci
 
 # Start the dev server
 npm run dev
@@ -158,6 +175,20 @@ npm run build
 npm run preview
 ```
 
+### Tests and lint
+
+The scoring and game-state tests use Node's built-in test runner:
+
+```bash
+node --test src/state/scoring.test.js src/state/gameState.test.js
+```
+
+Run ESLint with:
+
+```bash
+npm run lint
+```
+
 ---
 
 ## 📁 Project Structure
@@ -167,21 +198,25 @@ Gitopia/
 ├── index.html                    # Entry HTML, Google Fonts links
 ├── src/
 │   ├── main.jsx                  # React root
-│   ├── App.jsx                   # Router, localStorage persistence, layout
-│   ├── index.css                 # Full design system (CSS variables, animations)
+│   ├── App.jsx                   # App shell, persistence, tab-visibility pause
+│   ├── index.css                 # Design system and responsive layouts
 │   │
 │   ├── data/
-│   │   └── gameData.js           # All 10 modules, challenges, badges, levels
+│   │   └── gameData.js           # Modules, challenges, badges, levels, cheat sheet
 │   │
 │   ├── state/
-│   │   └── gameState.js          # useReducer state + all actions
+│   │   ├── gameState.js          # useReducer state and actions
+│   │   ├── gameState.test.js     # Reducer tests
+│   │   ├── scoring.js            # Mission/challenge score calculation
+│   │   └── scoring.test.js       # Score allocation and penalty tests
 │   │
 │   └── components/
 │       ├── Dashboard.jsx         # Mission map + profile sidebar
 │       ├── MissionScreen.jsx     # 3-phase mission flow + all challenge types
 │       ├── Navbar.jsx            # Sticky top nav with player info
 │       ├── Profile.jsx           # Player profile, avatar picker, badge gallery
-│       ├── Reference.jsx         # Searchable Git database
+│       ├── Reference.jsx         # Searchable Git cheat sheet and copy controls
+│       ├── Certification.jsx     # Certificate verification and print view
 │       └── shared/
 │           ├── Terminal.jsx      # Interactive terminal simulator
 │           ├── CommitGraph.jsx   # React Flow commit graph
@@ -224,7 +259,6 @@ The entire UI is built on a CSS variable design system in `src/index.css`:
 - [ ] **Global Git AI assistant** — ask questions mid-mission
 - [ ] **GitHub OAuth** — real leaderboard with GitHub profiles
 - [ ] **Daily challenge** — one Git puzzle per day
-- [ ] **Mobile layout** — responsive mission cards
 - [ ] **Sound effects** — terminal keystrokes, XP gain, level-up fanfare
 
 ---
