@@ -5,7 +5,7 @@ import { XPBar, LevelBadge } from './shared/XPBar';
 
 const NAV_ITEMS = [
     { view: 'dashboard', label: 'MAP', icon: '🗺' },
-    { view: 'reference', label: 'CHEATCODES', icon: '📡' },
+    { view: 'reference', label: 'CHEAT CODES', icon: '📡' },
     { view: 'profile', label: 'PROFILE', icon: '👾' },
 ];
 
@@ -54,7 +54,7 @@ export default function Navbar({ view, player, dispatch }) {
     const { current } = getLevelInfo(player.xp);
 
     return (
-        <nav style={{
+        <nav className="app-navbar" style={{
             position: 'sticky', top: 0, zIndex: 100,
             background: 'rgba(10, 14, 20, 0.88)',
             borderBottom: '1px solid rgba(57,255,20,0.12)',

@@ -198,6 +198,101 @@ const styles = `
     box-shadow: 0 0 45px rgba(57,255,20,0.5);
   }
 
+  @media (max-width: 700px) {
+    .cert-page {
+      padding: 1rem 0.75rem 2rem;
+    }
+
+    .cert-inner {
+      padding: 1rem;
+    }
+
+    .cert-border-outer {
+      inset: 0.5rem;
+      border-width: 1px;
+    }
+
+    .cert-border-inner {
+      inset: 0.7rem;
+    }
+
+    .cert-logo {
+      height: 28px;
+      margin-bottom: 0.5rem;
+    }
+
+    .cert-org-h {
+      font-size: 0.35rem;
+      letter-spacing: 0.08em;
+    }
+
+    .cert-title-h {
+      font-size: clamp(1rem, 5vw, 1.7rem);
+    }
+
+    .cert-body-h {
+      margin: 0.5rem 0;
+    }
+
+    .cert-label-h {
+      font-size: 0.5rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .cert-name-h {
+      font-size: clamp(1.25rem, 7vw, 2.2rem);
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.2rem;
+      border-bottom-width: 2px;
+    }
+
+    .cert-desc-h {
+      font-size: 0.48rem;
+      line-height: 1.35;
+    }
+
+    .cert-footer-h {
+      gap: 0.4rem;
+      padding-top: 0.5rem;
+    }
+
+    .cert-field-label {
+      font-size: 0.35rem;
+      letter-spacing: 0;
+    }
+
+    .cert-field-value {
+      font-size: 0.5rem;
+      overflow-wrap: anywhere;
+    }
+
+    .cert-auth-h {
+      bottom: 0.2rem;
+      right: 0.75rem;
+      font-size: 0.3rem;
+    }
+
+    .cert-btn {
+      max-width: 100%;
+      padding: 0.85rem 1rem;
+    }
+
+    .verify-overlay {
+      align-items: flex-start;
+      padding: 0.75rem;
+      overflow-y: auto;
+    }
+
+    .verify-card {
+      padding: 1.25rem;
+      margin: auto 0;
+    }
+
+    .verify-title {
+      font-size: 1.4rem;
+    }
+  }
+
   .cert-back-link {
     display: block;
     margin-top: 1.5rem;
@@ -322,6 +417,31 @@ const styles = `
     outline: none;
     border-color: var(--neon);
     background: rgba(255,255,255,0.08);
+  }
+
+  @media (max-width: 700px) {
+    .verify-overlay {
+      align-items: flex-start;
+      padding: 0.75rem;
+      overflow-y: auto;
+    }
+
+    .verify-card {
+      padding: 1.25rem;
+      margin: auto 0;
+    }
+
+    .verify-title {
+      font-size: 1.4rem;
+    }
+
+    .verify-subtitle {
+      margin-bottom: 1rem;
+    }
+
+    .verify-group {
+      margin-bottom: 1rem;
+    }
   }
 `;
 

@@ -43,14 +43,16 @@ export function gameReducer(state, action) {
             return { ...state, missionPhase: 'challenge' };
 
         case 'CHALLENGE_COMPLETE': {
-            const gained = action.payload;  // XP for this challenge
+            const { score, hintsUsed = 0 } = action.payload;
+            const currentMissionXP = Math.round((state.currentMissionXP + score) * 100) / 100;
             return {
                 ...state,
-                currentMissionXP: state.currentMissionXP + gained,
-                lastXPGain: gained,
+                currentMissionXP,
+                lastXPGain: Math.round((currentMissionXP - state.currentMissionXP) * 100) / 100,
                 player: {
                     ...state.player,
                     totalCommandsRun: state.player.totalCommandsRun + 1,
+                    hintsUsed: state.player.hintsUsed + hintsUsed,
                 },
             };
         }
@@ -67,8 +69,8 @@ export function gameReducer(state, action) {
             const isReplay = state.player.completedMissions.includes(module.id);
             
             // Only add XP if it's the first time completing this mission
-            const totalXP = state.currentMissionXP + bonusXP;
-            const newXP = isReplay ? state.player.xp : state.player.xp + totalXP;
+            const totalXP = Math.round((state.currentMissionXP + bonusXP) * 100) / 100;
+            const newXP = isReplay ? state.player.xp : Math.round((state.player.xp + totalXP) * 100) / 100;
 
             const newCompleted = isReplay
                 ? state.player.completedMissions

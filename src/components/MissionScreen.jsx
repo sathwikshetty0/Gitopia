@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MODULES, BADGES } from '../data/gameData';
 import { CommitGraph } from './shared/CommitGraph';
 import { Terminal } from './shared/Terminal';
+import { calculateChallengeScore } from '../state/scoring';
 
 // Utility for fuzzy matching command text
 const normalizeForMatch = (str) => {
@@ -17,18 +18,6 @@ const normalizeForMatch = (str) => {
         .replace(/[()]/g, '')
         .replace(/\s+/g, ' ')         // Collapse all whitespace to single spaces
         .trim();
-};
-
-// Utility for points calculation
-const calculatePoints = (baseXP, errors, hints, timeSeconds) => {
-    const errorPenalty = errors * 5;
-    const hintPenalty = hints * 10;
-    const timePenalty = Math.floor(timeSeconds / 30) * 2;
-    const final = baseXP - errorPenalty - hintPenalty - timePenalty;
-    return {
-        score: Math.max(0, final),
-        breakdown: { errorPenalty, hintPenalty, timePenalty }
-    };
 };
 
 // Confetti particle for reward screen
@@ -61,9 +50,9 @@ export default function MissionScreen({
     if (!mission) return null;
 
     return (
-        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '1rem 1rem 2rem' }}>
+        <div className="mission-page" style={{ maxWidth: '1000px', margin: '0 auto', padding: '1rem 1rem 2rem' }}>
             {/* Mission Title bar */}
-            <div style={{
+            <div className="mission-titlebar" style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 marginBottom: '1.25rem', padding: '0.75rem 1rem',
                 background: 'rgba(16,22,32,0.85)', border: '1px solid rgba(57,255,20,0.12)',
@@ -298,22 +287,33 @@ function BriefingPhase({ mission, dispatch }) {
 function ChallengePhase({ mission, activeChallengeIndex, dispatch }) {
     const challenge = mission.challenges[activeChallengeIndex];
     const total = mission.challenges.length;
+    const totalChallengeXP = mission.challenges.reduce((sum, item) => sum + item.xp, 0);
+    const challengeMax = mission.rewardXP * challenge.xp / totalChallengeXP;
     const [startTime] = useState(Date.now());
     const [challengeResult, setChallengeResult] = useState(null);
 
     const handleComplete = (xpEarned, penaltyData) => {
         const timeTaken = (Date.now() - startTime) / 1000;
-        const baseXP = 100 / total;
-        const result = calculatePoints(baseXP, penaltyData.errors, penaltyData.hints, timeTaken);
+        const result = calculateChallengeScore(
+            mission.rewardXP,
+            xpEarned,
+            totalChallengeXP,
+            penaltyData.errors,
+            penaltyData.hints,
+            timeTaken,
+        );
         
         setChallengeResult({
             score: result.score,
-            max: baseXP,
+            max: result.max,
             time: timeTaken,
             ...result.breakdown
         });
 
-        dispatch({ type: 'CHALLENGE_COMPLETE', payload: result.score });
+        dispatch({
+            type: 'CHALLENGE_COMPLETE',
+            payload: { score: result.score, hintsUsed: penaltyData.hints },
+        });
 
         const isLast = activeChallengeIndex + 1 >= total;
         setTimeout(() => {
@@ -329,7 +329,7 @@ function ChallengePhase({ mission, activeChallengeIndex, dispatch }) {
     return (
         <div style={{ position: 'relative' }}>
             {/* Progress header */}
-            <div style={{
+            <div className="challenge-progress-header" style={{
                 display: 'flex', alignItems: 'center', gap: '1rem',
                 padding: '0.65rem 1rem', marginBottom: '1rem',
                 background: 'rgba(22,27,34,0.7)', border: '1px solid rgba(88,166,255,0.15)',
@@ -341,12 +341,12 @@ function ChallengePhase({ mission, activeChallengeIndex, dispatch }) {
                 <div style={{ flex: 1, height: '5px', background: 'var(--bg-3)', borderRadius: '3px', overflow: 'hidden' }}>
                     <motion.div
                         style={{ height: '100%', background: 'var(--blue)', borderRadius: '3px' }}
-                        animate={{ width: `${(activeChallengeIndex / total) * 100}%` }}
+                        animate={{ width: `${((activeChallengeIndex + 1) / total) * 100}%` }}
                         transition={{ duration: 0.4 }}
                     />
                 </div>
                 <span style={{ color: 'var(--gold)', fontSize: '0.72rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
-                    VAL: {Math.round(100/total)} PTS
+                    MAX: {challengeMax.toFixed(1)} PTS
                 </span>
                 <span className="badge badge-blue" style={{ fontSize: '0.52rem' }}>
                     {challenge.type.replace('_', ' ').toUpperCase()}
@@ -1006,7 +1006,7 @@ function HintRow({ hints, hintsShown, setHintsShown, wrongCount = 0 }) {
 function RewardPhase({ mission, totalXP, actualGainedXP, earnedBadge, dispatch }) {
     const badge = BADGES.find(b => b.id === earnedBadge);
     const [animatedXP, setAnimatedXP] = useState(0);
-    const isPerfect = totalXP >= 95;
+    const isPerfect = totalXP >= mission.rewardXP * 0.95;
 
     const confettiColors = ['#39ff14', '#58a6ff', '#f0c040', '#bd93f9', '#ff4d4d', '#00f0ff'];
     const confettiParticles = Array.from({ length: 30 }, (_, i) => ({
@@ -1020,7 +1020,7 @@ function RewardPhase({ mission, totalXP, actualGainedXP, earnedBadge, dispatch }
         const step = totalXP / 60;
         const interval = setInterval(() => {
             current = Math.min(current + step, totalXP);
-            setAnimatedXP(Math.round(current));
+            setAnimatedXP(current);
             if (current >= totalXP) clearInterval(interval);
         }, 16);
         return () => clearInterval(interval);
@@ -1112,9 +1112,8 @@ function RewardPhase({ mission, totalXP, actualGainedXP, earnedBadge, dispatch }
                             transition={{ duration: 2, repeat: Infinity }}
                         >⚡ PERFECT RUN — Elite status confirmed!</motion.span>
                     )}
-                    {actualGainedXP > 0 && !isPerfect && (
-                        `Final Score: ${totalXP.toFixed(1)} / 100`
-                    )}
+                    {actualGainedXP > 0 && !isPerfect &&
+                        `Final Score: ${totalXP.toFixed(1)} / ${mission.rewardXP} XP`}
                 </motion.div>
 
                 {badge && (

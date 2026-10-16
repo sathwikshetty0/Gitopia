@@ -45,11 +45,12 @@ export function Terminal({ prompt = 'project/', expected = [], onSuccess, onErro
         } else if (!isCorrect && trimmed !== '') {
             setFlash('error');
             setTimeout(() => setFlash(null), 600);
-            setWrongCount(w => {
-                const nw = w + 1;
-                if (nw === 3 && hintsShown === 0) setHintsShown(1);
-                return nw;
-            });
+            const nextWrongCount = wrongCount + 1;
+            setWrongCount(nextWrongCount);
+            if (nextWrongCount === 3 && hintsShown === 0) {
+                setHintsShown(1);
+                onHint && onHint(1);
+            }
             onError && onError(trimmed);
         }
     };

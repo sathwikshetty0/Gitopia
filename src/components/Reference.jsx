@@ -6,7 +6,7 @@ export default function Reference() {
     const [searchTerm, setSearchTerm] = useState('');
     const [activeCategory, setActiveCategory] = useState('All');
 
-    const categories = useMemo(() => ['All', ...CHEAT_SHEET.map(c => c.category)], []);
+    const categories = useMemo(() => ['All', ...new Set(CHEAT_SHEET.map(c => c.category))], []);
 
     const filteredData = useMemo(() => {
         return CHEAT_SHEET.filter(cat =>
@@ -25,18 +25,16 @@ export default function Reference() {
     }, [searchTerm, activeCategory]);
 
     return (
-        <div style={{
+        <div className="reference-layout" style={{
             maxWidth: '1600px',
             margin: '0 auto',
             padding: '2rem 3rem',
-            display: 'grid',
-            gridTemplateColumns: '280px 1fr',
             gap: '3.5rem',
             alignItems: 'start'
         }}>
 
             {/* LEFT SIDEBAR: Categories */}
-            <aside style={{ position: 'sticky', top: '5rem' }}>
+            <aside className="reference-sidebar" style={{ position: 'sticky', top: '5rem' }}>
                 <motion.div
                     className="glass p-4"
                     initial={{ opacity: 0, x: -20 }}
@@ -52,10 +50,12 @@ export default function Reference() {
                     <div className="pixel neon-text mb-4" style={{ fontSize: '0.6rem', letterSpacing: '1px', paddingLeft: '0.5rem' }}>
                         ◈ SYSTEM_CATALOG
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <div className="reference-categories" style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                         {categories.map((cat, i) => (
                             <motion.button
                                 key={cat}
+                                type="button"
+                                aria-pressed={activeCategory === cat}
                                 onClick={() => setActiveCategory(cat)}
                                 whileHover={{ x: 3, backgroundColor: 'rgba(57,255,20,0.04)' }}
                                 whileTap={{ scale: 0.98 }}
@@ -98,31 +98,33 @@ export default function Reference() {
                     style={{ fontSize: '0.75rem', color: 'var(--text-dim)', lineHeight: 1.6 }}
                 >
                     <div className="blue-text mb-2" style={{ fontWeight: 700, fontSize: '0.65rem', letterSpacing: '0.04em' }}>💡 PRO TIP</div>
-                    Click any command to copy it to your clipboard. Use search to filter specific flags.
+                    Use Copy on a command or example to save it. Search by command or description, or filter by category.
                 </motion.div>
             </aside>
 
             {/* MAIN CONTENT Area */}
-            <section>
-                <motion.div
+            <section className="reference-content">
+                <motion.div className="reference-heading"
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}
                 >
                     <div>
-                        <h1 className="pixel neon-text" style={{ fontSize: '1.2rem', margin: 0 }}>GIT_CHEATCODES</h1>
+                        <h1 className="pixel neon-text" style={{ fontSize: '1.2rem', margin: 0 }}>GIT CHEAT SHEET</h1>
                         <p className="dim-text" style={{ fontSize: '0.82rem', marginTop: '0.4rem' }}>
                             Showing <span className="neon-text" style={{ fontWeight: 700 }}>{filteredData.reduce((acc, c) => acc + c.commands.length, 0)}</span> commands in <span className="blue-text" style={{ fontWeight: 700 }}>{activeCategory}</span>
                         </p>
                     </div>
 
-                    <div style={{ position: 'relative', width: '320px' }}>
+                    <div className="reference-search" style={{ position: 'relative', width: '320px' }}>
+                        <label className="sr-only" htmlFor="command-search">Search Git commands</label>
                         <span style={{
                             position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)',
                             color: 'var(--neon)', opacity: 0.5, fontSize: '0.78rem', pointerEvents: 'none',
                         }}>$ search_</span>
                         <input
-                            type="text"
+                            id="command-search"
+                            type="search"
                             placeholder="Filter commands..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -168,7 +170,7 @@ export default function Reference() {
                                         <span className="blue-text" style={{ opacity: 0.5 }}>MODULE_{idx + 1}</span>
                                     </div>
 
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                    <div className="command-grid" style={{ gap: '1.5rem' }}>
                                         {cat.commands.map(cmd => (
                                             <CommandCard key={cmd.cmd} cmd={cmd} />
                                         ))}
@@ -202,13 +204,24 @@ export default function Reference() {
 }
 
 function CommandCard({ cmd }) {
-    const [copied, setCopied] = useState(false);
+    const [copyStatus, setCopyStatus] = useState('');
     const [isHovered, setIsHovered] = useState(false);
 
-    const handleCopy = (text) => {
-        navigator.clipboard.writeText(text);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+    const handleCopy = async (text) => {
+        try {
+            if (!navigator.clipboard?.writeText) {
+                throw new Error('Clipboard access is unavailable in this browser.');
+            }
+            await navigator.clipboard.writeText(text);
+            setCopyStatus('Copied to clipboard');
+            setTimeout(() => setCopyStatus(''), 2000);
+            return true;
+        } catch (error) {
+            console.error('Unable to copy Git command:', error);
+            setCopyStatus('Copy failed. Select and copy the command manually.');
+            setTimeout(() => setCopyStatus(''), 4000);
+            return false;
+        }
     };
 
     return (
@@ -230,37 +243,24 @@ function CommandCard({ cmd }) {
             {/* Upper Content Area */}
             <div style={{ padding: '1.5rem', flex: 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.75rem' }}>
-                    <code style={{
+                    <code className="command-card-title" style={{
                         color: isHovered ? 'var(--blue)' : 'var(--neon)',
                         fontFamily: 'var(--font-code)',
                         fontWeight: 700,
                         fontSize: '1.22rem',
                         display: 'block',
-                        cursor: 'pointer',
                         transition: 'color 0.2s'
-                    }} onClick={() => handleCopy(cmd.cmd)}>
+                    }}>
                         {cmd.cmd}
                     </code>
-                    <AnimatePresence>
-                        {copied && (
-                            <motion.span
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0 }}
-                                style={{
-                                    fontSize: '0.66rem',
-                                    color: 'var(--neon)',
-                                    fontWeight: 700,
-                                    letterSpacing: '0.05em',
-                                    background: 'var(--neon-dim)',
-                                    padding: '2px 8px',
-                                    borderRadius: '4px'
-                                }}
-                            >
-                                COPIED!
-                            </motion.span>
-                        )}
-                    </AnimatePresence>
+                    <button
+                        type="button"
+                        className="copy-command-button"
+                        onClick={() => handleCopy(cmd.cmd)}
+                        aria-label={`Copy ${cmd.cmd}`}
+                    >
+                        Copy
+                    </button>
                 </div>
 
                 <p className="dim-text" style={{
@@ -272,6 +272,11 @@ function CommandCard({ cmd }) {
                 }}>
                     {cmd.desc}
                 </p>
+                {copyStatus && (
+                    <span className={`copy-command-status${copyStatus.startsWith('Copy failed') ? ' is-error' : ''}`} role="status">
+                        {copyStatus}
+                    </span>
+                )}
             </div>
 
             {/* Bottom Syntax Area (Bleeds to edges) */}
@@ -304,13 +309,12 @@ function CommandCard({ cmd }) {
 
 function SyntaxExample({ ex, handleCopy, cardHovered }) {
     const [isHovered, setIsHovered] = useState(false);
-    const [copyFeedback, setCopyFeedback] = useState(false);
+    const [copyFeedback, setCopyFeedback] = useState('');
 
-    const onCopy = (e) => {
-        if (e) e.stopPropagation();
-        handleCopy(ex);
-        setCopyFeedback(true);
-        setTimeout(() => setCopyFeedback(false), 1500);
+    const onCopy = async () => {
+        const copied = await handleCopy(ex);
+        setCopyFeedback(copied ? 'Copied' : 'Copy failed');
+        setTimeout(() => setCopyFeedback(''), 2000);
     };
 
     const getExplanation = (syntax) => {
@@ -466,34 +470,49 @@ function SyntaxExample({ ex, handleCopy, cardHovered }) {
     };
 
     return (
-        <div
+        <button
+            type="button"
+            className="syntax-example-button"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             onClick={onCopy}
+            aria-label={`Copy command example: ${ex}`}
             style={{
                 fontFamily: 'var(--font-code)',
                 fontSize: '0.86rem',
                 color: cardHovered ? '#fff' : '#ddd',
                 cursor: 'pointer',
                 display: 'flex',
-                alignItems: 'baseline', // Better for wrapped text
+                alignItems: 'baseline',
                 gap: '0.75rem',
                 transition: 'color 0.2s',
                 position: 'relative',
-                width: '100%', // Take full width
-                maxWidth: '100%'
+                width: '100%',
+                maxWidth: '100%',
+                textAlign: 'left',
+                border: 0,
+                background: 'transparent',
+                padding: '0.45rem 0',
             }}
+            onFocus={() => setIsHovered(true)}
+            onBlur={() => setIsHovered(false)}
         >
             <span style={{ color: cardHovered ? 'var(--blue)' : 'var(--neon)', transition: 'color 0.2s', flexShrink: 0 }}>λ</span>
             <span style={{ 
-                color: copyFeedback ? 'var(--neon)' : 'inherit',
+                color: copyFeedback === 'Copied' ? 'var(--neon)' : 'inherit',
                 wordBreak: 'break-word', // Wrap long words if needed
                 whiteSpace: 'pre-wrap'  // Preserves spacing but allows wrapping
             }}>{ex}</span>
+            {copyFeedback && (
+                <span className={`syntax-copy-feedback${copyFeedback === 'Copy failed' ? ' is-error' : ''}`} role="status">
+                    {copyFeedback}
+                </span>
+            )}
 
             <AnimatePresence>
                 {isHovered && (
-                    <motion.div
+                    <motion.span
+                        className="syntax-tooltip"
                         initial={{ opacity: 0, y: 5, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 5, scale: 0.95 }}
@@ -519,7 +538,7 @@ function SyntaxExample({ ex, handleCopy, cardHovered }) {
                         }}
                     >
                         {/* Tooltip Arrow */}
-                        <div style={{
+                        <span aria-hidden="true" style={{
                             position: 'absolute',
                             bottom: '-5px',
                             left: '12px',
@@ -533,9 +552,9 @@ function SyntaxExample({ ex, handleCopy, cardHovered }) {
                         
                         <span style={{ opacity: 0.5 }}>ℹ</span>
                         {getExplanation(ex).replace('// ', '')}
-                    </motion.div>
+                    </motion.span>
                 )}
             </AnimatePresence>
-        </div>
+        </button>
     );
 }

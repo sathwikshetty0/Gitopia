@@ -50,8 +50,6 @@ export default function App() {
       display: 'flex',
       flexDirection: 'column',
       position: 'relative',
-      userSelect: 'none',
-      WebkitUserSelect: 'none'
     }}>
       <SecurityShield />
       {/* Background decoration — always behind */}
@@ -205,118 +203,49 @@ function MissionProgressStrip({ missionPhase, dispatch }) {
   );
 }
 
-/**
- * Advanced Security Shield
- * Deterrant against screenshots and screen recording
- */
 function SecurityShield() {
-  const [isSecure, setIsSecure] = useState(true);
+  const [isVisible, setIsVisible] = useState(() => document.visibilityState === 'visible');
 
   useEffect(() => {
-    // 1. Prevent Right Click
-    const handleContextMenu = (e) => e.preventDefault();
-    
-    // 2. Prevent Common Screenshot & Inspect Shortcuts
-    const handleKeyDown = (e) => {
-      // PrintScreen
-      if (e.key === 'PrintScreen') {
-        alert('Screenshots are disabled for security reasons.');
-        e.preventDefault();
-      }
-
-      // Cmd+Shift+3/4 (Mac) or Win+Shift+S (Windows) triggers are OS level, 
-      // but we can catch certain combinations
-      if ((e.metaKey || e.ctrlKey) && (e.key === 's' || e.key === 'p' || e.key === 'S' || e.key === 'P')) {
-        e.preventDefault();
-      }
-
-      // Disable F12 and Inspect
-      if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C'))) {
-        e.preventDefault();
-      }
-      if (e.metaKey && e.altKey && (e.key === 'i' || e.key === 'I')) {
-        e.preventDefault();
-      }
+    const handleVisibilityChange = () => {
+      setIsVisible(document.visibilityState === 'visible');
     };
 
-    // 3. Focus Monitoring (Deter Screen Recording)
-    const handleFocus = () => setIsSecure(true);
-    const handleBlur = () => setIsSecure(false);
-
-    window.addEventListener('contextmenu', handleContextMenu);
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('focus', handleFocus);
-    window.addEventListener('blur', handleBlur);
-
-    return () => {
-      window.removeEventListener('contextmenu', handleContextMenu);
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('focus', handleFocus);
-      window.removeEventListener('blur', handleBlur);
-    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
-  return (
-    <>
-      {/* Visual Shield: Blurs content when focus is lost */}
-      <AnimatePresence>
-        {!isSecure && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{
-              position: 'fixed',
-              inset: 0,
-              zIndex: 9999,
-              background: 'rgba(0,0,0,0.97)',
-              backdropFilter: 'blur(30px)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'var(--neon)',
-              fontFamily: 'var(--font-pixel)',
-              textAlign: 'center',
-              padding: '2rem'
-            }}
-          >
-            <motion.div
-              style={{ fontSize: '3rem', marginBottom: '1rem' }}
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >⚠️</motion.div>
-            <div style={{ fontSize: '1.2rem', letterSpacing: '2px' }}>SECURITY_SHIELD_ACTIVE</div>
-            <div className="dim-text" style={{ fontSize: '0.8rem', marginTop: '1rem', fontFamily: 'var(--font-code)' }}>
-              WINDOW FOCUS LOST // CONTENT PROTECTED
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Persistent subtle watermark across the screen */}
-      <div style={{
+  return !isVisible ? (
+    <motion.div
+      className="security-pause-overlay"
+      role="status"
+      aria-live="polite"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      style={{
         position: 'fixed',
         inset: 0,
-        pointerEvents: 'none',
-        zIndex: 9998,
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gridTemplateRows: 'repeat(4, 1fr)',
-        opacity: 0.02,
-        fontSize: '0.7rem',
-        color: 'white',
-        fontFamily: 'var(--font-code)',
-        transform: 'rotate(-20deg) scale(1.5)'
-      }}>
-        {Array.from({ length: 16 }).map((_, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            PRIVATE_GITOPIA_ENCRYPTED
-          </div>
-        ))}
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'var(--neon)',
+        fontFamily: 'var(--font-pixel)',
+        textAlign: 'center',
+        padding: '2rem'
+      }}
+    >
+      <motion.div
+        style={{ fontSize: '3rem', marginBottom: '1rem' }}
+        animate={{ scale: [1, 1.1, 1] }}
+        transition={{ duration: 2, repeat: Infinity }}
+      >⏸️</motion.div>
+      <div style={{ fontSize: '1.2rem', letterSpacing: '2px' }}>SESSION_PAUSED</div>
+      <div className="dim-text" style={{ fontSize: '0.8rem', marginTop: '1rem', fontFamily: 'var(--font-code)' }}>
+        RETURN TO THIS TAB TO CONTINUE
       </div>
-    </>
-  );
+    </motion.div>
+  ) : null;
 }
 
 function BackgroundDecor() {

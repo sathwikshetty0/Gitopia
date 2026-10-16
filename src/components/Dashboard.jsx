@@ -9,23 +9,21 @@ export default function Dashboard({ player, dispatch }) {
     const { current: levelInfo } = getLevelInfo(player.xp);
 
     return (
-        <div style={{
-            display: 'grid',
-            gridTemplateColumns: '320px 1fr',
+        <div className="dashboard-layout" style={{
             gap: '1.5rem',
             padding: '1rem 1.5rem',
             maxWidth: '1600px',
             margin: '0 auto',
         }}>
             {/* LEFT — Profile */}
-            <aside style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <aside className="dashboard-sidebar" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <ProfileCard player={player} levelInfo={levelInfo} dispatch={dispatch} />
                 <BadgeGallery player={player} />
                 <StatsCard player={player} />
             </aside>
 
             {/* RIGHT — Skill Tree */}
-            <main>
+            <main className="dashboard-main">
                 <SkillTree player={player} dispatch={dispatch} />
             </main>
         </div>
@@ -318,9 +316,7 @@ function SkillTree({ player, dispatch }) {
                 </div>
             </div>
 
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
+            <div className="mission-grid" style={{
                 gap: '1.25rem',
             }}>
                 {MODULES.map((mod, i) => (

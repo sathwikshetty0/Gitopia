@@ -52,7 +52,7 @@ export default function Profile({ player, dispatch }) {
     };
 
     return (
-        <div style={{ maxWidth: '960px', margin: '0 auto', padding: '1.5rem' }}>
+        <div className="profile-page" style={{ maxWidth: '960px', margin: '0 auto', padding: '1.5rem' }}>
             <motion.div
                 className="pixel neon-text text-center"
                 style={{ fontSize: '0.75rem', marginBottom: '1.5rem' }}
@@ -62,7 +62,7 @@ export default function Profile({ player, dispatch }) {
                 ◈ PLAYER PROFILE ◈
             </motion.div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+            <div className="profile-layout" style={{ gap: '1.25rem' }}>
 
                 {/* ── LEFT COLUMN ── */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -299,7 +299,7 @@ export default function Profile({ player, dispatch }) {
                                 {player.badges.length}/{BADGES.length}
                             </span>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.55rem' }}>
+                        <div className="profile-badges-grid" style={{ gap: '0.55rem' }}>
                             {BADGES.map((badge, i) => {
                                 const earned = player.badges.includes(badge.id);
                                 return (
